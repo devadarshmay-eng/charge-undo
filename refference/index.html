@@ -395,6 +395,7 @@ body.ready #panel{opacity:1}
 #panel-scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .cover{position:relative;height:156px;flex:none;background:var(--panel-3)}
 .cover img{width:100%;height:100%;object-fit:cover;opacity:.92}
+.generic-cover-icon{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);font-size:48px;opacity:0.15;color:var(--text)}
 .cover::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,19,21,.35),transparent 30%,transparent 55%,var(--panel))}
 .cover-top{position:absolute;top:10px;left:10px;right:10px;display:flex;align-items:center;gap:6px;z-index:2}
 .cover-op{font:600 9.5px var(--disp);letter-spacing:.12em;text-transform:uppercase;color:#fff;
@@ -656,7 +657,7 @@ body.ready .chrome{opacity:1;transform:none}
     <div class="cover-hd">
       <span class="cover-st" id="cv-st"></span>
       <h2 class="cover-name" id="cv-name">—</h2>
-      <div class="cover-rate"><i data-lucide="star"></i><b id="cv-rating">–</b><span id="cv-reviews">– reviews</span><span style="color:var(--dim)">·</span><span id="cv-hours">–</span></div>
+      <div class="cover-rate"><i data-lucide="star" id="cv-rating-star"></i><b id="cv-rating">–</b><span id="cv-reviews" style="display:none">– reviews</span><span id="cv-rate-sep" style="color:var(--dim)">·</span><span id="cv-hours">–</span></div>
     </div>
   </div>
   <div id="panel-scroll">
@@ -937,6 +938,16 @@ function layoutMarkers(intro){
   const z=map.getZoom();
   const vis=visibleStations();
   $('#live-count').textContent=vis.filter(s=>s.status==='available').length;
+  if (vis.length === 0) {
+    const hasSparseFilter = [...activeFilters].some(f => ['fast', 'ultra', 'ccs2', 'chademo', 'type2', 'restaurant', 'cafe', 'restroom', 'wheelchair', '24hours', 'parking'].includes(f));
+    if (hasSparseFilter) {
+      $('#empty-filters b').textContent = 'No stations tagged yet';
+      $('#empty-filters p').textContent = 'Be the first to confirm one.';
+    } else {
+      $('#empty-filters b').textContent = 'No stations match';
+      $('#empty-filters p').textContent = 'Try removing a filter or widening the map view.';
+    }
+  }
   $('#empty-filters').classList.toggle('show', vis.length===0 && !document.body.classList.contains('navigating'));
   const ms = clamp(0.78 + (z-11.5)*0.085, 0.74, 1.05);
 
@@ -1126,19 +1137,62 @@ function availTxt(s){
 
 /* -------- full panel body -------- */
 function renderPanel(s){
-  $('#cv-img').src=s.photos[0];
+  const img = $('#cv-img');
+  const hasPhoto = s.photos && s.photos[0] && s.photos[0] !== 'N/A' && s.photos[0].trim() !== '';
+  if (hasPhoto) {
+    img.src = s.photos[0];
+    img.style.display = '';
+    const icon = $('#cv-gen-icon');
+    if (icon) icon.style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    let icon = $('#cv-gen-icon');
+    if (!icon) {
+      icon = document.createElement('div');
+      icon.id = 'cv-gen-icon';
+      icon.className = 'generic-cover-icon';
+      icon.textContent = '⚡';
+      $('#panel-cover').appendChild(icon);
+    } else {
+      icon.style.display = '';
+    }
+  }
+
   $('#cv-op').textContent=s.op;
   const st=$('#cv-st');
   st.className='cover-st '+statusCls(s.status);
   st.innerHTML=`<span class="d" style="width:6px;height:6px;border-radius:50%;background:currentColor"></span>${statusLabel(s.status)} · ${availTxt(s)}`;
   $('#cv-name').textContent=s.name;
-  $('#cv-rating').textContent=s.rating.toFixed(1);
-  $('#cv-reviews').textContent=s.rev+' reviews';
-  $('#cv-hours').textContent=s.hours;
+  
+  if(s.rating){
+    $('#cv-rating').style.display='';
+    $('#cv-rating-star').style.display='';
+    $('#cv-rating').textContent=s.rating.toFixed(1);
+    $('#cv-rate-sep').style.display='';
+  } else {
+    $('#cv-rating').style.display='none';
+    $('#cv-rating-star').style.display='none';
+    $('#cv-rate-sep').style.display='none';
+  }
+  $('#cv-reviews').style.display='none';
+  
+  if (s.hours && s.hours !== '—' && s.hours !== 'N/A' && s.hours.trim() !== '') {
+    $('#cv-hours').style.display = '';
+    $('#cv-hours').textContent = s.hours;
+  } else {
+    $('#cv-hours').style.display = 'none';
+    $('#cv-rate-sep').style.display = 'none';
+  }
+
   $('#cv-fav').classList.toggle('faved',favs.has(s.id));
   $('#panel-scroll').scrollTop=0;
 
   const body=$('#pbody');
+  
+  const hasHoursRow = s.hours && s.hours !== '—' && s.hours !== 'N/A' && s.hours.trim() !== '';
+  const hasPhoneRow = s.phone && s.phone !== '—' && s.phone !== 'N/A' && s.phone.trim() !== '';
+  const hasWebsiteRow = s.website && s.website !== '—' && s.website !== 'N/A' && s.website.trim() !== '';
+
   body.innerHTML=`
     <div class="keyline">
       <div><b class="gr tnum">${s.kw}</b><span>kW max</span></div><i></i>
@@ -1149,8 +1203,16 @@ function renderPanel(s){
     <div>
       <div class="inforow"><i data-lucide="map-pin"></i><span class="tx"><b>${s.addr}</b>, San Francisco</span>
         <button class="mini" id="row-copy"><i data-lucide="copy"></i>Copy</button></div>
-      <div class="inforow"><i data-lucide="clock"></i><span class="tx"><b class="${s.status==='offline'?'closed':'open-now'}">${s.hours}</b>${s.h24?'':' · Updated this week'}</span></div>
+      ${hasHoursRow ? `
+        <div class="inforow"><i data-lucide="clock"></i><span class="tx"><b class="${s.status==='offline'?'closed':'open-now'}">${s.hours}</b>${s.h24?'':' · Updated this week'}</span></div>
+      ` : ''}
       <div class="inforow"><i data-lucide="circle-dollar-sign"></i><span class="tx"><b>$${s.price.toFixed(2)}/kWh</b> · ${s.fee? '$'+s.fee+' session fee' : 'no session fee'} · idle $0.40/min</span></div>
+      ${hasPhoneRow ? `
+        <div class="inforow"><i data-lucide="phone"></i><span class="tx"><b>${s.phone}</b></span></div>
+      ` : ''}
+      ${hasWebsiteRow ? `
+        <div class="inforow"><i data-lucide="globe"></i><span class="tx"><a href="${s.website}" target="_blank" style="color:var(--blue)">${s.website}</a></span></div>
+      ` : ''}
     </div>
     <div>
       <div class="sect"><h4>Connectors</h4><span class="live-tag"><i></i>Live</span></div>
@@ -1170,13 +1232,6 @@ function renderPanel(s){
       <div class="sect"><h4>Photos</h4></div>
       <div class="photostrip">${s.photos.map(p=>`<img src="${p}" alt="Station photo" loading="lazy" onload="this.classList.add('ld')" />`).join('')}</div>
     </div>
-    <div>
-      <div class="sect"><h4>Recent reviews</h4><span style="font-size:11px;color:var(--dim)">${s.rev} total</span></div>
-      <div id="rev-list">
-        <div class="rev"><div class="skl" style="height:12px;width:45%"></div><div class="skl" style="height:10px;width:92%;margin-top:8px"></div><div class="skl" style="height:10px;width:70%;margin-top:5px"></div></div>
-        <div class="rev"><div class="skl" style="height:12px;width:38%"></div><div class="skl" style="height:10px;width:85%;margin-top:8px"></div></div>
-      </div>
-    </div>
     <div style="height:6px"></div>`;
   lucide.createIcons();
   renderStalls(s);
@@ -1185,13 +1240,6 @@ function renderPanel(s){
   const more=$('#stall-more');
   if(more) more.onclick=()=>{ stallExpanded=!stallExpanded; renderStalls(s);
     more.textContent=stallExpanded?`Show fewer`:`Show all ${s.conn.length} stalls`; };
-  /* reviews resolve after short latency */
-  clearTimeout(window._revT);
-  window._revT=setTimeout(()=>{
-    const rl=$('#rev-list'); if(!rl || current!==s.id) return;
-    const pick=[REVIEWS[s.rev%4], REVIEWS[(s.rev+1)%4===s.rev%4?(s.rev+2)%4:(s.rev+1)%4]];
-    rl.innerHTML=pick.map(r=>`<div class="rev"><div class="rev-top"><b>${r.n} <span style="color:var(--dim);font-weight:500">· ${r.v}</span></b><span>${r.t}</span></div><p>${r.p}</p></div>`).join('');
-  },700);
 }
 function renderStalls(s, shimmer=true){
   const list=$('#stall-list'); if(!list) return;
