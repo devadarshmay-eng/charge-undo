@@ -615,6 +615,47 @@ textarea {
     transform: translateY(105%);
   }
   
+  #topbar {
+    padding: 10px 10px 0;
+    gap: 6px;
+  }
+
+  #topbar .row1 {
+    display: grid;
+    grid-template-areas: 
+      "logo fav info"
+      "search search search";
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .logo-lockup {
+    grid-area: logo;
+    font-size: 23px;
+    align-self: center;
+  }
+
+  #searchwrap {
+    grid-area: search;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  #topbar .row1 button.icobtn {
+    grid-area: fav;
+  }
+
+  #topbar .row1 a.icobtn {
+    grid-area: info;
+  }
+
+  #rail {
+    top: auto;
+    bottom: 200px;
+    right: 12px;
+  }
+
   #statusstack {
     bottom: 130px;
   }
@@ -887,7 +928,7 @@ textarea {
 
 @media(max-width: 767px) {
   #sparse-banner {
-    top: 96px; /* Sits exactly below the top chipbar on mobile */
+    top: 154px; /* Sits exactly below the top chipbar on mobile */
     padding: 10px 14px 12px 14px;
     border-radius: 12px;
     display: grid;

@@ -7,10 +7,10 @@ const MapView = dynamic(
   () => import("./map-view").then((mod) => mod.MapView),
   { ssr: false }
 );
+const TopBar = dynamic(() => import("./top-bar").then((mod) => mod.TopBar), { ssr: false });
 import { ReportModal } from "./report-modal";
 import { StationPanel } from "./station-panel";
 import type { Station } from "./station-types";
-import { TopBar } from "./top-bar";
 
 const DEFAULT_USER_LOCATION = { lat: 10.0, lng: 76.3 };
 
@@ -64,6 +64,9 @@ export function ChargeMap({ initialLoc }: { initialLoc?: { lat: number; lng: num
   const mapViewRef = useRef<any>(null);
   const hasCenteredUser = useRef(false);
 
+  const [gpsAccuracy, setGpsAccuracy] = useState<number | null>(null);
+  const [gpsError, setGpsError] = useState(false);
+
   const handleZoomIn = () => mapViewRef.current?.zoomIn();
   const handleZoomOut = () => mapViewRef.current?.zoomOut();
   const handleToggle3D = () => {
@@ -78,13 +81,20 @@ export function ChargeMap({ initialLoc }: { initialLoc?: { lat: number; lng: num
         (pos) => {
           const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           setUserLoc(loc);
+          setGpsAccuracy(pos.coords.accuracy);
+          setGpsError(false);
           mapViewRef.current?.locate(loc);
         },
-        () => {
+        (err) => {
+          console.warn("Locate geolocation error: ", err);
+          setGpsError(true);
+          setGpsAccuracy(null);
           mapViewRef.current?.locate(userLoc);
         }
       );
     } else {
+      setGpsError(true);
+      setGpsAccuracy(null);
       mapViewRef.current?.locate(userLoc);
     }
   };
@@ -142,9 +152,18 @@ export function ChargeMap({ initialLoc }: { initialLoc?: { lat: number; lng: num
         (pos) => {
           setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
           setMapCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          setGpsAccuracy(pos.coords.accuracy);
+          setGpsError(false);
         },
-        (err) => console.log("Geolocation error, using default: ", err)
+        (err) => {
+          console.warn("Initial geolocation error: ", err);
+          setGpsError(true);
+          setGpsAccuracy(null);
+        }
       );
+    } else {
+      setGpsError(true);
+      setGpsAccuracy(null);
     }
 
     if (typeof window !== "undefined") {
@@ -359,6 +378,8 @@ export function ChargeMap({ initialLoc }: { initialLoc?: { lat: number; lng: num
         onZoomOut={handleZoomOut}
         onToggle3D={handleToggle3D}
         onLocate={handleLocate}
+        gpsAccuracy={gpsAccuracy}
+        gpsError={gpsError}
       />
       
       <StationPanel

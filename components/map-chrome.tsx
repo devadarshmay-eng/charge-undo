@@ -7,6 +7,8 @@ type LegendStatusStackProps = {
   onZoomOut: () => void;
   onToggle3D: () => void;
   onLocate: () => void;
+  gpsAccuracy: number | null;
+  gpsError: boolean;
 };
 
 export function LegendStatusStack({
@@ -15,8 +17,20 @@ export function LegendStatusStack({
   onZoomIn,
   onZoomOut,
   onToggle3D,
-  onLocate
+  onLocate,
+  gpsAccuracy,
+  gpsError
 }: LegendStatusStackProps) {
+  let gpsText = "Locating...";
+  let dotColor = "var(--mut)";
+  if (gpsError) {
+    gpsText = "Location unavailable";
+    dotColor = "var(--red)";
+  } else if (gpsAccuracy !== null) {
+    gpsText = `GPS · ±${Math.round(gpsAccuracy)} m`;
+    dotColor = "var(--green)";
+  }
+
   return (
     <>
       <aside id="rail">
@@ -31,7 +45,10 @@ export function LegendStatusStack({
       </aside>
       <div id="statusstack">
         <span className="pill"><i className="pd" />{count} stations</span>
-        <span className="pill"><i className="pd" />GPS · ±8 m</span>
+        <span className="pill">
+          <i className="pd" style={{ background: dotColor }} />
+          {gpsText}
+        </span>
       </div>
     </>
   );
