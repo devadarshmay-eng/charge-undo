@@ -154,6 +154,11 @@ export function ChargeMap({ initialLoc }: { initialLoc?: { lat: number; lng: num
         setReportOpen(true);
       }
     }
+
+    document.documentElement.classList.add("app-no-scroll");
+    return () => {
+      document.documentElement.classList.remove("app-no-scroll");
+    };
   }, []);
 
   useEffect(() => {
