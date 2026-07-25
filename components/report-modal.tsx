@@ -34,7 +34,12 @@ export function ReportModal({ open, mode, station, userLoc, onClose, onSubmitSuc
   const [reason, setReason] = useState<StationStatus>("broken");
   const [customText, setCustomText] = useState("");
   const [connectorType, setConnectorType] = useState("");
+  
+  // Photo states
   const [photoUrl, setPhotoUrl] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploading, setUploading] = useState(false);
   
   // Add mode fields
   const [name, setName] = useState("");
@@ -51,11 +56,16 @@ export function ReportModal({ open, mode, station, userLoc, onClose, onSubmitSuc
   const [error, setError] = useState<string | null>(null);
 
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
       setError(null);
       setTurnstileToken("");
+      setPhotoUrl("");
+      setSelectedFile(null);
+      setUploadProgress(null);
+      setUploading(false);
       if (mode === "add" && userLoc) {
         setLat(userLoc.lat.toString());
         setLng(userLoc.lng.toString());
@@ -108,6 +118,67 @@ export function ReportModal({ open, mode, station, userLoc, onClose, onSubmitSuc
       }
     };
   }, [open, mode]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+    setUploading(true);
+    setUploadProgress(0);
+    setError(null);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://upload.imagekit.io/api/v1/files/upload");
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        setUploadProgress(percent);
+      }
+    };
+
+    xhr.onload = () => {
+      setUploading(false);
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          setPhotoUrl(response.url || response.thumbnailUrl || "");
+          setUploadProgress(null);
+        } catch (err) {
+          setError("Failed to parse image upload response.");
+          setUploadProgress(null);
+        }
+      } else {
+        setError("Photo upload failed. You can still submit the report without a photo.");
+        setUploadProgress(null);
+      }
+    };
+
+    xhr.onerror = () => {
+      setUploading(false);
+      setUploadProgress(null);
+      setError("Network error during photo upload. You can still submit the report without a photo.");
+    };
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("fileName", file.name);
+    formData.append("publicKey", process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || "");
+    formData.append("uploadPreset", "default"); // Unsigned preset config
+    
+    xhr.send(formData);
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setPhotoUrl("");
+    setUploadProgress(null);
+    setUploading(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   if (!open) return null;
 
@@ -235,13 +306,36 @@ export function ReportModal({ open, mode, station, userLoc, onClose, onSubmitSuc
                   onChange={(e) => setConnectorType(e.target.value)}
                   style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
                 />
-                <input
-                  type="text"
-                  placeholder="Photo URL (optional)"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoUrl(e.target.value)}
-                  style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
-                />
+                
+                {/* Photo Drop UI */}
+                <div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/jpeg,image/png"
+                    style={{ display: "none" }}
+                  />
+                  {!selectedFile ? (
+                    <div id="photo-drop" onClick={() => fileInputRef.current?.click()}>
+                      <span style={{ fontSize: "16px" }}>📷</span>
+                      <span>Add a photo of the issue</span>
+                      <span style={{ fontSize: "10px", color: "var(--dim)" }}>JPG or PNG · up to 10 MB</span>
+                    </div>
+                  ) : (
+                    <div id="photo-prev" className="show">
+                      <span style={{ fontSize: "14px" }}>🖼️</span>
+                      <b style={{ fontSize: "12px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {selectedFile.name} 
+                        {uploadProgress !== null && ` (${uploadProgress}%)`}
+                        {uploading && " (Uploading...)"}
+                        {photoUrl && " (Ready)"}
+                      </b>
+                      <button type="button" onClick={handleRemoveFile}>Remove</button>
+                    </div>
+                  )}
+                </div>
+
                 <textarea
                   placeholder="Add a note (optional)"
                   maxLength={80}
