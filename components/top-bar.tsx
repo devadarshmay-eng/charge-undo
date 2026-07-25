@@ -10,6 +10,8 @@ type Props = {
   onSelect: (station: Station) => void;
   showSavedOnly: boolean;
   onToggleSavedOnly: () => void;
+  allKerala: boolean;
+  onToggleAllKerala: () => void;
 };
 
 const filters = [
@@ -27,7 +29,9 @@ export function TopBar({
   onFilter,
   onSelect,
   showSavedOnly,
-  onToggleSavedOnly
+  onToggleSavedOnly,
+  allKerala,
+  onToggleAllKerala
 }: Props) {
   const results = query
     ? stations
@@ -111,6 +115,18 @@ export function TopBar({
         </a>
       </div>
       <nav id="chipbar">
+        <button
+          className={`chip ${allKerala ? "on" : ""}`}
+          onClick={onToggleAllKerala}
+          style={{
+            borderColor: allKerala ? "var(--lime)" : undefined,
+            background: allKerala ? "rgba(198, 255, 61, 0.08)" : undefined,
+            color: allKerala ? "var(--lime)" : undefined
+          }}
+        >
+          <i className="cdot" style={{ background: allKerala ? "var(--lime)" : undefined }} />
+          All Kerala
+        </button>
         {filters.map(([key, label]) => (
           <button
             className={`chip ${active.has(key) ? "on" : ""}`}

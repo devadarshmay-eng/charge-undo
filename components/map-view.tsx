@@ -19,6 +19,7 @@ export interface MapViewRef {
   zoomOut: () => void;
   toggle3D: () => boolean;
   locate: (userLoc: { lat: number; lng: number }) => void;
+  fitBounds: (stations: Station[]) => void;
 }
 
 const colors: Record<string, string> = {
@@ -37,6 +38,29 @@ export const MapView = forwardRef<MapViewRef, MapViewProps>(
     const map = useRef<Map | null>(null);
     const markers = useRef<Marker[]>([]);
     const userMarker = useRef<Marker | null>(null);
+
+    const fitBoundsToStations = (targetStations: Station[]) => {
+      if (!map.current || targetStations.length === 0) return;
+      
+      const bounds = targetStations.reduce(
+        (acc, station) => {
+          return [
+            [Math.min(acc[0][0], station.lng), Math.min(acc[0][1], station.lat)],
+            [Math.max(acc[1][0], station.lng), Math.max(acc[1][1], station.lat)]
+          ];
+        },
+        [
+          [targetStations[0].lng, targetStations[0].lat],
+          [targetStations[0].lng, targetStations[0].lat]
+        ]
+      );
+
+      map.current.fitBounds(bounds as [[number, number], [number, number]], {
+        padding: { top: 80, bottom: 80, left: 50, right: 50 },
+        maxZoom: 13,
+        duration: 1200
+      });
+    };
 
     useImperativeHandle(ref, () => ({
       zoomIn: () => {
@@ -64,6 +88,9 @@ export const MapView = forwardRef<MapViewRef, MapViewProps>(
           zoom: 13,
           duration: 1500
         });
+      },
+      fitBounds: (targetStations) => {
+        fitBoundsToStations(targetStations);
       }
     }));
 

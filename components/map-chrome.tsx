@@ -41,21 +41,13 @@ export function DisclaimerBar({ onReport }: { onReport: () => void }) {
   return (
     <footer id="disclaimer">
       Some locations may be inaccurate.{" "}
-      <button
-        onClick={onReport}
-        style={{
-          background: "none",
-          border: "none",
-          color: "var(--blue)",
-          textDecoration: "underline",
-          padding: 0,
-          cursor: "pointer",
-          font: "inherit",
-          display: "inline"
-        }}
-      >
+      <button onClick={onReport}>
         Help improve the map by reporting incorrect station locations.
       </button>
+      {" · Developed by "}
+      <a href="https://devadarsh.pages.dev" target="_blank" rel="noopener noreferrer">
+        Devadarsh Anoop
+      </a>
     </footer>
   );
 }

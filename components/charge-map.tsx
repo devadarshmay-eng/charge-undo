@@ -39,7 +39,7 @@ function getHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: nu
   return R * c;
 }
 
-export function ChargeMap() {
+export function ChargeMap({ initialLoc }: { initialLoc?: { lat: number; lng: number } | null }) {
   const [stations, setStations] = useState<Station[]>([]);
   const [selected, setSelected] = useState<Station | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -48,10 +48,16 @@ export function ChargeMap() {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportMode, setReportMode] = useState<"report" | "add">("report");
   const [navigatingStation, setNavigatingStation] = useState<Station | null>(null);
-  const [userLoc, setUserLoc] = useState(DEFAULT_USER_LOCATION);
+  const [allKerala, setAllKerala] = useState(false);
+  
+  const [userLoc, setUserLoc] = useState(() => {
+    return initialLoc ? { lat: initialLoc.lat, lng: initialLoc.lng } : DEFAULT_USER_LOCATION;
+  });
   
   // Viewport tracking & sparse density banner states
-  const [mapCenter, setMapCenter] = useState(DEFAULT_USER_LOCATION);
+  const [mapCenter, setMapCenter] = useState(() => {
+    return initialLoc ? { lat: initialLoc.lat, lng: initialLoc.lng } : DEFAULT_USER_LOCATION;
+  });
   const [dismissedCenter, setDismissedCenter] = useState<{ lat: number; lng: number } | null>(null);
 
   const [is3D, setIs3D] = useState(false);
@@ -159,12 +165,71 @@ export function ChargeMap() {
 
   const visible = useMemo(() => {
     return stations.filter((station) => {
+      // 1. Always show selected station (escape hatch)
+      if (selected && station.id === selected.id) return true;
+
+      // 2. Always show stations matching search query (escape hatch)
+      if (query) {
+        const matchesSearch = `${station.name} ${station.address} ${station.operator ?? ""} ${station.connectorType ?? ""}`
+          .toLowerCase()
+          .includes(query.toLowerCase());
+        if (matchesSearch) {
+          if (showSavedOnly && !favorites.has(station.id)) return false;
+          if (filters.size && !filters.has(station.status ?? "unconfirmed")) return false;
+          return true;
+        }
+      }
+
       if (showSavedOnly && !favorites.has(station.id)) return false;
-      return !filters.size || filters.has(station.status ?? "unconfirmed");
+      if (filters.size && !filters.has(station.status ?? "unconfirmed")) return false;
+
+      // 3. Filter by distance unless allKerala is true
+      if (!allKerala) {
+        const dist = getHaversineDistance(userLoc.lat, userLoc.lng, station.lat, station.lng);
+        if (dist > 35) return false;
+      }
+      return true;
     });
-  }, [stations, filters, showSavedOnly, favorites]);
-  const select = useCallback((station: Station) => { setSelected(station); setPanelOpen(true); setQuery(""); setNavigatingStation(null); }, []);
-  const toggle = (filter: string) => setFilters((current) => { const next = new Set(current); next.has(filter) ? next.delete(filter) : next.add(filter); return next; });
+  }, [stations, filters, showSavedOnly, favorites, userLoc, allKerala, selected, query]);
+
+  // Fit map bounds when visible stations change due to All Kerala toggle or initial load
+  const lastAllKerala = useRef<boolean | null>(null);
+  const initialFitDone = useRef(false);
+
+  useEffect(() => {
+    if (!mapViewRef.current || typeof mapViewRef.current.fitBounds !== "function" || visible.length === 0) return;
+
+    const shouldFit = 
+      !initialFitDone.current || 
+      lastAllKerala.current !== allKerala;
+
+    if (shouldFit) {
+      mapViewRef.current.fitBounds(visible);
+      lastAllKerala.current = allKerala;
+      initialFitDone.current = true;
+    }
+  }, [visible, allKerala]);
+
+  const select = useCallback((station: Station) => {
+    setSelected(station);
+    setPanelOpen(true);
+    setQuery("");
+    setNavigatingStation(null);
+    mapViewRef.current?.locate({ lat: station.lat, lng: station.lng });
+  }, []);
+
+  const toggle = (filter: string) => {
+    setFilters((current) => {
+      const next = new Set(current);
+      if (next.has(filter)) {
+        next.delete(filter);
+      } else {
+        next.add(filter);
+      }
+      return next;
+    });
+    setAllKerala(false); // Reset to nearby-only default when selecting a status filter
+  };
 
   const onConfirmReport = async (reportId: string, turnstileToken: string) => {
     if (selected) {
@@ -279,6 +344,8 @@ export function ChargeMap() {
         onSelect={select}
         showSavedOnly={showSavedOnly}
         onToggleSavedOnly={() => setShowSavedOnly(!showSavedOnly)}
+        allKerala={allKerala}
+        onToggleAllKerala={() => setAllKerala(prev => !prev)}
       />
       <LegendStatusStack
         count={visible.length}
@@ -327,24 +394,7 @@ export function ChargeMap() {
       />
 
       {showBanner && (
-        <div
-          className="srf"
-          style={{
-            position: "fixed",
-            top: "108px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 25,
-            padding: "10px 16px",
-            borderRadius: "20px",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            fontSize: "12px",
-            fontWeight: "500",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.25)"
-          }}
-        >
+        <div id="sparse-banner" className="srf">
           <span>📍 Not many stations here — be the first to add one</span>
           <button
             className="btn btn-pri"
@@ -357,8 +407,8 @@ export function ChargeMap() {
             Add Station
           </button>
           <button
+            className="banner-close"
             onClick={() => setDismissedCenter(mapCenter)}
-            style={{ background: "none", border: "none", color: "var(--dim)", cursor: "pointer", fontSize: "14px", padding: "0 4px" }}
           >
             ✕
           </button>
