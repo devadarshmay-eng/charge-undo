@@ -1,91 +1,40 @@
-# ChargeUndo
+# Case Study: ChargeUndo
 
-ChargeUndo is a community-driven, real-time crowdsourced EV charging status registry and map application designed specifically for electric vehicle owners and travelers in Kerala, India.
-
----
-
-## The Problem: Kerala's EV Charging Pain Points
-
-While electric vehicle adoption in Kerala is growing exponentially, EV drivers face critical infrastructure challenges on the road:
-- **Unreliable Status Reporting:** Network status feeds from various charging providers (KSEB, ChargeMOD, Zeon, etc.) are frequently out-of-sync with the physical state of the chargers. A charger marked "online" in a provider's app may be blocked by internal system errors, power cuts, or physical access issues.
-- **KSEB Downtime & Grid Fluctuations:** Public KSEB (Kerala State Electricity Board) chargers are critical for highway travel, but suffer from grid downtime, transformer repairs, or lack of on-site service support.
-- **Connector Mismatches:** Incorrect listings of charger types (e.g., CCS2 vs. Type 2 or CHAdeMO) lead to drivers arriving at high-speed ports only to find they cannot physically plug in their vehicle.
-- **Rural and Highway Coverage Gaps:** Major routes like NH 66, MC Road, and high-range bypasses through Idukki and Wayanad have sparse charger density, where a single broken plug can leave a driver stranded.
+### Crowdsourcing EV Reliability Across Kerala
 
 ---
 
-## How it Works: Crowd Verification, Quorums, and Trust Scores
+## The Problem: Fragmented, Out-of-Sync EV Infrastructure
+Kerala has seen an exponential rise in electric vehicle adoption. However, drivers navigating the state’s highways (like NH 66 and MC Road) and high-range terrains (Wayanad, Idukki) face a stressful reality: public charging status data is fragmented and unreliable. 
 
-To solve status unreliability without depending on official operator APIs, ChargeUndo uses a decentralized, secure crowd verification loop:
-1. **Real-time Report Submissions:** Drivers check in at physical charging spots. If they find an issue (e.g., the charger is broken, occupied, or missing), they submit a status preset report.
-2. **Turnstile Security & Device Matching:** Submissions require a secure Cloudflare Turnstile token validation and attach a persistent `x-device-id` header generated on the client. This prevents automated spam and script attacks.
-3. **Quorum Verification System:**
-   - A new user report marks a station status as `unconfirmed`.
-   - Other users visiting the station click **Confirm Report** or **Dispute / Flag**.
-   - Multiple matching confirmations lock the status as verified (e.g., `available`, `busy`, or `broken`).
-   - Conflicting disputes trigger a `disputed` state, prompting other drivers to verify the correct status.
-4. **Trust-Score Adjustments:** Device submissions are tracked. Users with historically accurate reports (submitting reports that achieve quorum) gain a higher trust score, increasing the weight of their confirmations, whereas accounts repeatedly flagged for fraudulent disputes have their reports deprecated.
+Official utility apps (like KSEB's charging portal or private network applications) are frequently out of sync with physical reality. A charger marked "online" on an official feed might suffer from unannounced KSEB grid downtime, transformer failures, or physical access closures. Compounding this, incorrect connector listings (e.g., mismatching CCS2 and Type 2 ports) and critical highway coverage gaps mean that a single out-of-service plug can leave a family stranded. 
 
----
+## The Approach: Decentralized Crowd-Verified Status
+ChargeUndo bypasses centralized, slow-to-update operator APIs. Instead, it places verification in the hands of the drivers themselves. 
 
-## Deliberately Out of Scope (and Why)
+The application establishes a decentralized trust network:
+1. **Real-time Presets:** Drivers check in at physical charging hubs to submit simple status reports (available, busy, broken, or missing).
+2. **Turnstile & Device Safeguards:** Every report is protected by Cloudflare Turnstile token validation and client-side device header matching, blocking scripted manipulation or bot spam.
+3. **Quorum Consensus:** A single driver's flag flags the station as `unconfirmed`. It requires subsequent drivers to click **Confirm** or **Dispute** to establish a quorum.
+4. **Weighted Trust Scores:** Reports are weighted dynamically based on a driver’s historical reporting accuracy, ensuring high-integrity consensus without gatekeeping.
 
-To keep the platform lightweight, fast, and secure, the following features are explicitly out of scope:
-- **No Blockchain / Tokenomics:** We do not use web3 tokens or blockchain ledgers. Traditional web databases are faster, consume negligible energy, do not require gas fees, and keep the user experience simple.
-- **No AI / LLMs:** There is no AI model running behind verification. Deciding if a charger works is a binary physical truth best checked by a human driver, not guessed by a language model.
-- **No Station-Owner Notification Without Consent:** We do not automatically alert station owners when their charger is reported broken. This avoids spamming business owners with false flags and protects community-driven data.
-- **No Phone Verification:** Accounts are identified seamlessly using device headers instead of SMS OTP checks. This eliminates friction for travelers in low-network regions who cannot receive text messages, and keeps the project free of third-party SMS gateway fees.
+The live map acts as a shared, transparent mirror of actual utility health, allowing both daily drivers and planning bodies to trace real-time community uptime metrics and identify high-need charging corridors.
 
----
+## Considered Decisions (Deliberately Out of Scope)
+A key part of building ChargeUndo was deciding what *not* to build. These choices were deliberate design decisions aimed at maximizing speed, usability, and data integrity:
+- **No Blockchain or Tokenomics:** Incentivizing reports with web3 tokens or crypto assets introduces financial speculation, high transaction latencies, and unnecessary gas fees. A fast, relational server is cleaner, faster, and highly energy-efficient.
+- **No AI Guesswork:** We do not employ language models or predictive AI to guess whether a charger is operational. Determining if a plug delivers current is a physical, binary truth that only a human driver on the ground can verify.
+- **No Automatic Owner Alerts:** We do not automatically notify station operators when their chargers are flagged. This prevents bad-faith spamming of small business owners and ensures that ChargeUndo remains a dedicated community resource first.
 
-## Data Sources & Precision Note
+## Data Sources & The Precision Caveat
+ChargeUndo compiles its baseline directory from open-source maps, crowd directories, and public utility listings. 
 
-- **Source Material:** Initial station listings were compiled from open datasets, crowd directories, and public utility maps.
-- **Honest Precision Warning:** **29 town-level accuracy stations** in the dataset reflect estimated town-center coordinates rather than precise GPS coordinates. These stations are visually indicated on the map so users can help pin their exact locations by submitting coordinate updates on-site.
+However, complete transparency is central to the project: **29 town-level accuracy stations** in the initial dataset reflect estimated town-center coordinates rather than exact geographical coordinates. These stations are highlighted on the map with custom UI alerts, prompting drivers to physically pin their precise GPS locations when visiting.
 
 ---
 
-## Setup & Run Instructions
-
-### Prerequisites
-- Node.js (v18+)
-- PostgreSQL Database
-
-### Installation
-1. Clone the repository and install dependencies:
-   ```bash
-   npm install
-   ```
-2. Set up the environment variables (see below).
-3. Run migrations to initialize the database:
-   ```bash
-   npm run db:generate
-   ```
-4. Seed the database with initial Kerala charging stations:
-   ```bash
-   npm run db:seed
-   ```
-5. Launch the development server:
-   ```bash
-   npm run dev
-   ```
+### Developed by [Devadarsh Anoop](https://devadarsh.pages.dev)
 
 ---
 
-## Environment Variables Needed
-
-Create a `.env` file in the root directory and add the following keys:
-```env
-# Database Configuration
-DATABASE_URL="postgresql://user:password@localhost:5432/chargeundo"
-
-# Public ImageKit Configuration (Unsigned Client-Side Upload)
-NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY="your_imagekit_public_key"
-NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT="https://ik.imagekit.io/your_endpoint_id/"
-```
-
----
-
-## Target Audience Note
-
-In this version, **the public live map itself is the core value** for all visitors, including government planning bodies and station operators. Rather than viewing a secondary admin dashboard, government agencies and station owners use the live map to observe real-time community uptime metrics, view crowd-reported breakdowns, and identify under-served density corridors across Kerala.
+<sub>**Quickstart:** Clone, run `npm install`, populate `.env` (DATABASE_URL, IMAGEKIT_PRIVATE_KEY, NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY, NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT), and start with `npm run dev`.</sub>
