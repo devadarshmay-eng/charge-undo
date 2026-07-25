@@ -13,8 +13,18 @@ export function getDeviceId(): string {
   const existingId = readDeviceId();
   if (existingId) return existingId;
 
-  const deviceId = crypto.randomUUID();
-  document.cookie = `${DEVICE_COOKIE}=${deviceId}; Path=/; Max-Age=${ONE_YEAR_SECONDS}; SameSite=Lax; Secure`;
+  let deviceId;
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    deviceId = crypto.randomUUID();
+  } else {
+    deviceId = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  document.cookie = `${DEVICE_COOKIE}=${deviceId}; Path=/; Max-Age=${ONE_YEAR_SECONDS}; SameSite=Lax`;
   return deviceId;
 }
 

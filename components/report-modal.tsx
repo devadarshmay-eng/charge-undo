@@ -15,9 +15,11 @@ const getDeviceId = () => {
   if (typeof window === "undefined") return "";
   let id = localStorage.getItem("device_id");
   if (!id) {
-    id = "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
-      (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4))).toString(16)
-    );
+    id = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
     localStorage.setItem("device_id", id);
   }
   return id;
@@ -56,6 +58,7 @@ export function ReportModal({ open, mode, station, userLoc, onClose, onSubmitSuc
   const [error, setError] = useState<string | null>(null);
 
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -88,10 +91,20 @@ export function ReportModal({ open, mode, station, userLoc, onClose, onSubmitSuc
       document.head.appendChild(script);
     }
 
+    let timeoutId: any = null;
+    let widgetId: string | null = null;
+
     const checkAndRender = () => {
       if ((window as any).turnstile && turnstileContainerRef.current) {
         try {
-          (window as any).turnstile.render(turnstileContainerRef.current, {
+          if (turnstileWidgetIdRef.current) {
+            try {
+              (window as any).turnstile.remove(turnstileWidgetIdRef.current);
+            } catch (err) {}
+            turnstileWidgetIdRef.current = null;
+          }
+
+          widgetId = (window as any).turnstile.render(turnstileContainerRef.current, {
             sitekey: "1x00000000000000000000AA", // Cloudflare test key
             callback: (token: string) => {
               setTurnstileToken(token);
@@ -100,21 +113,28 @@ export function ReportModal({ open, mode, station, userLoc, onClose, onSubmitSuc
               setError("Turnstile verification failed. Please try again.");
             }
           });
+          turnstileWidgetIdRef.current = widgetId;
         } catch (e) {
           console.error("Turnstile render error", e);
         }
       } else {
-        setTimeout(checkAndRender, 100);
+        timeoutId = setTimeout(checkAndRender, 100);
       }
     };
 
     checkAndRender();
 
     return () => {
-      if ((window as any).turnstile && turnstileContainerRef.current) {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      if ((window as any).turnstile && widgetId) {
         try {
-          (window as any).turnstile.remove(turnstileContainerRef.current);
+          (window as any).turnstile.remove(widgetId);
         } catch (e) {}
+        if (turnstileWidgetIdRef.current === widgetId) {
+          turnstileWidgetIdRef.current = null;
+        }
       }
     };
   }, [open, mode]);

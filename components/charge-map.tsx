@@ -1,7 +1,12 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { DisclaimerBar, LegendStatusStack } from "./map-chrome";
-import { MapView } from "./map-view";
+import dynamic from "next/dynamic";
+
+const MapView = dynamic(
+  () => import("./map-view").then((mod) => mod.MapView),
+  { ssr: false }
+);
 import { ReportModal } from "./report-modal";
 import { StationPanel } from "./station-panel";
 import type { Station } from "./station-types";
@@ -13,9 +18,11 @@ const getDeviceId = () => {
   if (typeof window === "undefined") return "";
   let id = localStorage.getItem("device_id");
   if (!id) {
-    id = "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
-      (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4))).toString(16)
-    );
+    id = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0;
+      const v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
     localStorage.setItem("device_id", id);
   }
   return id;
@@ -46,6 +53,64 @@ export function ChargeMap() {
   // Viewport tracking & sparse density banner states
   const [mapCenter, setMapCenter] = useState(DEFAULT_USER_LOCATION);
   const [dismissedCenter, setDismissedCenter] = useState<{ lat: number; lng: number } | null>(null);
+
+  const [is3D, setIs3D] = useState(false);
+  const mapViewRef = useRef<any>(null);
+  const hasCenteredUser = useRef(false);
+
+  const handleZoomIn = () => mapViewRef.current?.zoomIn();
+  const handleZoomOut = () => mapViewRef.current?.zoomOut();
+  const handleToggle3D = () => {
+    if (mapViewRef.current) {
+      const active = mapViewRef.current.toggle3D();
+      setIs3D(active);
+    }
+  };
+  const handleLocate = () => {
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setUserLoc(loc);
+          mapViewRef.current?.locate(loc);
+        },
+        () => {
+          mapViewRef.current?.locate(userLoc);
+        }
+      );
+    } else {
+      mapViewRef.current?.locate(userLoc);
+    }
+  };
+
+  const [showSavedOnly, setShowSavedOnly] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("favorites");
+        if (stored) {
+          setFavorites(new Set(JSON.parse(stored)));
+        }
+      } catch (e) {
+        console.error("Failed to load favorites", e);
+      }
+    }
+  }, []);
+
+  const toggleFavorite = (stationId: string) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(stationId)) {
+        next.delete(stationId);
+      } else {
+        next.add(stationId);
+      }
+      localStorage.setItem("favorites", JSON.stringify(Array.from(next)));
+      return next;
+    });
+  };
 
   const fetchStations = useCallback(async () => {
     try {
@@ -85,7 +150,19 @@ export function ChargeMap() {
     }
   }, []);
 
-  const visible = useMemo(() => stations.filter((station) => !filters.size || filters.has(station.status ?? "unconfirmed")), [stations, filters]);
+  useEffect(() => {
+    if (userLoc && userLoc.lat !== DEFAULT_USER_LOCATION.lat && !hasCenteredUser.current && mapViewRef.current) {
+      mapViewRef.current.locate(userLoc);
+      hasCenteredUser.current = true;
+    }
+  }, [userLoc]);
+
+  const visible = useMemo(() => {
+    return stations.filter((station) => {
+      if (showSavedOnly && !favorites.has(station.id)) return false;
+      return !filters.size || filters.has(station.status ?? "unconfirmed");
+    });
+  }, [stations, filters, showSavedOnly, favorites]);
   const select = useCallback((station: Station) => { setSelected(station); setPanelOpen(true); setQuery(""); setNavigatingStation(null); }, []);
   const toggle = (filter: string) => setFilters((current) => { const next = new Set(current); next.has(filter) ? next.delete(filter) : next.add(filter); return next; });
 
@@ -185,11 +262,13 @@ export function ChargeMap() {
   return (
     <main className={panelOpen ? "mode-panel" : selected ? "mode-selected" : ""}>
       <MapView
+        ref={mapViewRef}
         stations={visible}
         selectedId={selected?.id ?? null}
         routeCoordinates={navigatingStation ? [[userLoc.lng, userLoc.lat], [navigatingStation.lng, navigatingStation.lat]] : null}
         onSelect={select}
         onViewportChange={setMapCenter}
+        userLoc={userLoc}
       />
       <TopBar
         stations={stations}
@@ -198,8 +277,17 @@ export function ChargeMap() {
         filters={filters}
         onFilter={toggle}
         onSelect={select}
+        showSavedOnly={showSavedOnly}
+        onToggleSavedOnly={() => setShowSavedOnly(!showSavedOnly)}
       />
-      <LegendStatusStack count={visible.length} />
+      <LegendStatusStack
+        count={visible.length}
+        is3D={is3D}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onToggle3D={handleToggle3D}
+        onLocate={handleLocate}
+      />
       
       <StationPanel
         station={selected}
@@ -216,10 +304,16 @@ export function ChargeMap() {
         onConfirmReport={onConfirmReport}
         onFlagReport={onFlagReport}
         onRateStation={onRateStation}
+        isFavorite={selected ? favorites.has(selected.id) : false}
+        onToggleFavorite={() => selected && toggleFavorite(selected.id)}
       />
       
       <DisclaimerBar onReport={() => {
-        setReportMode("report");
+        if (selected) {
+          setReportMode("report");
+        } else {
+          setReportMode("add");
+        }
         setReportOpen(true);
       }} />
       
@@ -327,28 +421,6 @@ export function ChargeMap() {
           </button>
         </div>
       )}
-
-      <div id="location-inaccurate-notice">
-        Some locations may be inaccurate. Help improve the map by{" "}
-        <button
-          onClick={() => {
-            setReportMode("add");
-            setReportOpen(true);
-          }}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--blue)",
-            textDecoration: "underline",
-            padding: 0,
-            cursor: "pointer",
-            fontWeight: "500"
-          }}
-        >
-          reporting incorrect station locations
-        </button>
-        .
-      </div>
     </main>
   );
 }
