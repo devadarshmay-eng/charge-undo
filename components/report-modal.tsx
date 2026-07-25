@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import type { Station, StationStatus } from "./station-types";
+import { upload } from "@imagekit/javascript";
 
 type Props = {
   open: boolean;
@@ -139,7 +140,7 @@ export function ReportModal({ open, mode, station, userLoc, onClose, onSubmitSuc
     };
   }, [open, mode]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -148,46 +149,47 @@ export function ReportModal({ open, mode, station, userLoc, onClose, onSubmitSuc
     setUploadProgress(0);
     setError(null);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://upload.imagekit.io/api/v1/files/upload");
-
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percent = Math.round((event.loaded / event.total) * 100);
-        setUploadProgress(percent);
+    try {
+      // 1. Fetch authentication parameters from the server-side API
+      const authRes = await fetch("/api/upload-auth");
+      if (!authRes.ok) {
+        throw new Error("Failed to get upload authorization parameters");
       }
-    };
+      const authData = await authRes.json();
+      const { token, expire, signature, publicKey } = authData;
 
-    xhr.onload = () => {
-      setUploading(false);
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const response = JSON.parse(xhr.responseText);
-          setPhotoUrl(response.url || response.thumbnailUrl || "");
-          setUploadProgress(null);
-        } catch (err) {
-          setError("Failed to parse image upload response.");
-          setUploadProgress(null);
+      // 2. Upload file directly using client SDK with signature parameters and native onProgress handler
+      upload({
+        file: file,
+        fileName: file.name,
+        publicKey: publicKey,
+        token: token,
+        signature: signature,
+        expire: expire,
+        onProgress: (event) => {
+          if (event && event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percent);
+          }
         }
-      } else {
+      })
+      .then((result) => {
+        setUploading(false);
+        setPhotoUrl(result.url || result.thumbnailUrl || "");
+        setUploadProgress(null);
+      })
+      .catch((err) => {
+        console.error("ImageKit upload error callback:", err);
+        setUploading(false);
         setError("Photo upload failed. You can still submit the report without a photo.");
         setUploadProgress(null);
-      }
-    };
-
-    xhr.onerror = () => {
+      });
+    } catch (err: any) {
+      console.error("ImageKit upload error:", err);
       setUploading(false);
       setUploadProgress(null);
-      setError("Network error during photo upload. You can still submit the report without a photo.");
-    };
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("fileName", file.name);
-    formData.append("publicKey", process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || "");
-    formData.append("uploadPreset", "default"); // Unsigned preset config
-    
-    xhr.send(formData);
+      setError("Photo upload authorization failed. You can still submit the report without a photo.");
+    }
   };
 
   const handleRemoveFile = () => {
