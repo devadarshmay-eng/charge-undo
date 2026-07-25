@@ -1,9 +1,341 @@
 "use client";
-import { useState } from "react";
-import type { StationStatus } from "./station-types";
-type Props = { open: boolean; stationName?: string; onClose: () => void };
-const options: [StationStatus, string][] = [["broken", "Out of service"], ["occupied", "All chargers busy"], ["missing", "Station missing"], ["other", "Something else"]];
-export function ReportModal({ open, stationName, onClose }: Props) {
-  const [reason, setReason] = useState<StationStatus>("broken"); if (!open) return null;
-  return <div id="report-overlay" className="open" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}><div id="report-modal" className="srf"><button className="modal-x" onClick={onClose}>×</button><h2>Report an issue</h2><p>{stationName}</p><div className="report-reasons">{options.map(([key, label]) => <button className={`rep-reason ${reason === key ? "on" : ""}`} onClick={() => setReason(key)} key={key}>{label}</button>)}</div><textarea placeholder="Add a note (optional)" maxLength={80} /><div className="hp" aria-hidden="true"><input name="website_confirmation" tabIndex={-1} autoComplete="off" /></div><button className="btn btn-pri" onClick={onClose}>Submit report</button></div></div>;
+import { useState, useEffect, useRef } from "react";
+import type { Station, StationStatus } from "./station-types";
+
+type Props = {
+  open: boolean;
+  mode: "report" | "add";
+  station?: Station | null;
+  userLoc?: { lat: number; lng: number };
+  onClose: () => void;
+  onSubmitSuccess: (data: any) => void;
+};
+
+const getDeviceId = () => {
+  if (typeof window === "undefined") return "";
+  let id = localStorage.getItem("device_id");
+  if (!id) {
+    id = "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
+      (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4))).toString(16)
+    );
+    localStorage.setItem("device_id", id);
+  }
+  return id;
+};
+
+const reportOptions: [StationStatus, string][] = [
+  ["broken", "Out of service"],
+  ["occupied", "All chargers busy"],
+  ["missing", "Station missing"],
+  ["other", "Something else"]
+];
+
+export function ReportModal({ open, mode, station, userLoc, onClose, onSubmitSuccess }: Props) {
+  const [reason, setReason] = useState<StationStatus>("broken");
+  const [customText, setCustomText] = useState("");
+  const [connectorType, setConnectorType] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  
+  // Add mode fields
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
+  const [phone, setPhone] = useState("");
+  const [website, setWebsite] = useState("");
+  const [hours, setHours] = useState("");
+  const [operator, setOperator] = useState("");
+  
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setError(null);
+      setTurnstileToken("");
+      if (mode === "add" && userLoc) {
+        setLat(userLoc.lat.toString());
+        setLng(userLoc.lng.toString());
+      }
+    }
+  }, [open, mode, userLoc]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    // Load Turnstile script
+    const scriptId = "turnstile-script";
+    let script = document.getElementById(scriptId) as HTMLScriptElement;
+    if (!script) {
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+
+    const checkAndRender = () => {
+      if ((window as any).turnstile && turnstileContainerRef.current) {
+        try {
+          (window as any).turnstile.render(turnstileContainerRef.current, {
+            sitekey: "1x00000000000000000000AA", // Cloudflare test key
+            callback: (token: string) => {
+              setTurnstileToken(token);
+            },
+            "error-callback": () => {
+              setError("Turnstile verification failed. Please try again.");
+            }
+          });
+        } catch (e) {
+          console.error("Turnstile render error", e);
+        }
+      } else {
+        setTimeout(checkAndRender, 100);
+      }
+    };
+
+    checkAndRender();
+
+    return () => {
+      if ((window as any).turnstile && turnstileContainerRef.current) {
+        try {
+          (window as any).turnstile.remove(turnstileContainerRef.current);
+        } catch (e) {}
+      }
+    };
+  }, [open, mode]);
+
+  if (!open) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!turnstileToken) {
+      setError("Please complete the Turnstile security challenge.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (mode === "report") {
+        if (!station) throw new Error("No station selected for reporting.");
+        const res = await fetch("/api/reports", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-device-id": getDeviceId()
+          },
+          body: JSON.stringify({
+            stationId: station.id,
+            statusPreset: reason,
+            connectorType: connectorType || undefined,
+            customText: customText || undefined,
+            photoUrl: photoUrl || undefined,
+            turnstileToken
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to submit report.");
+        onSubmitSuccess({ type: "report", stationId: station.id, status: data.status, latestReportId: data.id });
+      } else {
+        // Add mode
+        if (!name.trim()) throw new Error("Station name is required.");
+        if (!address.trim()) throw new Error("Station address is required.");
+        const parsedLat = parseFloat(lat);
+        const parsedLng = parseFloat(lng);
+        if (isNaN(parsedLat) || parsedLat < -90 || parsedLat > 90) throw new Error("Latitude must be a number between -90 and 90.");
+        if (isNaN(parsedLng) || parsedLng < -180 || parsedLng > 180) throw new Error("Longitude must be a number between -180 and 180.");
+
+        const res = await fetch("/api/stations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-device-id": getDeviceId()
+          },
+          body: JSON.stringify({
+            name,
+            address,
+            lat: parsedLat,
+            lng: parsedLng,
+            phone: phone || undefined,
+            website: website || undefined,
+            hours: hours || undefined,
+            operator: operator || undefined,
+            connectorType: connectorType || undefined,
+            turnstileToken
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to add station.");
+        onSubmitSuccess({
+          type: "add",
+          station: {
+            id: data.id,
+            source: "user-submitted",
+            name,
+            address,
+            lat: parsedLat,
+            lng: parsedLng,
+            phone: phone || undefined,
+            website: website || undefined,
+            hours: hours || undefined,
+            operator: operator || undefined,
+            connectorType: connectorType || undefined,
+            status: "unconfirmed"
+          }
+        });
+      }
+      onClose();
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div id="report-overlay" className="open" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
+      <div id="report-modal" className="srf" style={{ maxHeight: "90vh", overflowY: "auto" }}>
+        <button className="modal-x" onClick={onClose} disabled={loading}>×</button>
+        <h2>{mode === "report" ? "Report an issue" : "Add a missing station"}</h2>
+        {mode === "report" && <p style={{ color: "var(--mut)", marginBottom: "12px" }}>{station?.name}</p>}
+
+        {error && (
+          <div style={{ color: "var(--red)", background: "rgba(255,92,92,0.1)", border: "1px solid rgba(255,92,92,0.2)", borderRadius: "8px", padding: "10px", marginBottom: "12px", fontSize: "12px" }}>
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          {mode === "report" ? (
+            <>
+              <div className="report-reasons" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", margin: "12px 0" }}>
+                {reportOptions.map(([key, label]) => (
+                  <button
+                    type="button"
+                    className={`rep-reason ${reason === key ? "on" : ""}`}
+                    onClick={() => setReason(key)}
+                    key={key}
+                    style={{ padding: "8px", fontSize: "12px" }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "12px" }}>
+                <input
+                  type="text"
+                  placeholder="Connector Type (e.g. CCS2, Type 2) (optional)"
+                  value={connectorType}
+                  onChange={(e) => setConnectorType(e.target.value)}
+                  style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+                />
+                <input
+                  type="text"
+                  placeholder="Photo URL (optional)"
+                  value={photoUrl}
+                  onChange={(e) => setPhotoUrl(e.target.value)}
+                  style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+                />
+                <textarea
+                  placeholder="Add a note (optional)"
+                  maxLength={80}
+                  value={customText}
+                  onChange={(e) => setCustomText(e.target.value)}
+                  style={{ width: "100%", minHeight: "60px", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+                />
+              </div>
+            </>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", margin: "12px 0" }}>
+              <input
+                type="text"
+                placeholder="Station Name (required)"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+              />
+              <input
+                type="text"
+                placeholder="Address (required)"
+                required
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+              />
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  type="number"
+                  step="any"
+                  placeholder="Latitude (required)"
+                  required
+                  value={lat}
+                  onChange={(e) => setLat(e.target.value)}
+                  style={{ flex: 1, padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+                />
+                <input
+                  type="number"
+                  step="any"
+                  placeholder="Longitude (required)"
+                  required
+                  value={lng}
+                  onChange={(e) => setLng(e.target.value)}
+                  style={{ flex: 1, padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+                />
+              </div>
+              <input
+                type="text"
+                placeholder="Phone (optional)"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+              />
+              <input
+                type="text"
+                placeholder="Website URL (optional)"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+              />
+              <input
+                type="text"
+                placeholder="Hours (e.g. Open 24 hours) (optional)"
+                value={hours}
+                onChange={(e) => setHours(e.target.value)}
+                style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+              />
+              <input
+                type="text"
+                placeholder="Operator (optional)"
+                value={operator}
+                onChange={(e) => setOperator(e.target.value)}
+                style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+              />
+              <input
+                type="text"
+                placeholder="Connector Type (e.g. CCS2) (optional)"
+                value={connectorType}
+                onChange={(e) => setConnectorType(e.target.value)}
+                style={{ width: "100%", padding: "8px", border: "1px solid var(--line)", borderRadius: "8px", background: "#0003", color: "var(--text)" }}
+              />
+            </div>
+          )}
+
+          <div style={{ display: "flex", justifyContent: "center", margin: "12px 0 16px" }}>
+            <div ref={turnstileContainerRef} />
+          </div>
+
+          <button type="submit" className="btn btn-pri" style={{ width: "100%", justifyContent: "center" }} disabled={loading}>
+            {loading ? "Submitting..." : mode === "report" ? "Submit report" : "Add station"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 }

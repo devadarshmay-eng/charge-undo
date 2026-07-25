@@ -15,5 +15,6 @@ export type Station = {
   coverPhotoUrl?: string;
   ratingAverage?: number;
   status?: StationStatus;
+  latestReportId?: string;
   statusUpdatedAt?: string;
 };

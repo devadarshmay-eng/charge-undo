@@ -9,6 +9,18 @@ import { TopBar } from "./top-bar";
 
 const DEFAULT_USER_LOCATION = { lat: 10.0, lng: 76.3 };
 
+const getDeviceId = () => {
+  if (typeof window === "undefined") return "";
+  let id = localStorage.getItem("device_id");
+  if (!id) {
+    id = "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
+      (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4))).toString(16)
+    );
+    localStorage.setItem("device_id", id);
+  }
+  return id;
+};
+
 function getHaversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371; // km
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -27,11 +39,28 @@ export function ChargeMap() {
   const [filters, setFilters] = useState(new Set<string>());
   const [query, setQuery] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
+  const [reportMode, setReportMode] = useState<"report" | "add">("report");
   const [navigatingStation, setNavigatingStation] = useState<Station | null>(null);
   const [userLoc, setUserLoc] = useState(DEFAULT_USER_LOCATION);
 
+  const fetchStations = useCallback(async () => {
+    try {
+      const response = await fetch("/api/stations");
+      if (response.ok) {
+        const data = await response.json();
+        setStations(data.stations);
+        if (selected) {
+          const updated = data.stations.find((s: Station) => s.id === selected.id);
+          if (updated) setSelected(updated);
+        }
+      }
+    } catch (e) {
+      console.error("Unable to load stations:", e);
+    }
+  }, [selected]);
+
   useEffect(() => {
-    fetch("/api/stations").then(async (response) => response.ok ? response.json() as Promise<{ stations: Station[] }> : Promise.reject(new Error("Unable to load stations."))).then((data) => setStations(data.stations)).catch(console.error);
+    fetchStations();
     
     if (typeof navigator !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -47,6 +76,71 @@ export function ChargeMap() {
   const select = useCallback((station: Station) => { setSelected(station); setPanelOpen(true); setQuery(""); setNavigatingStation(null); }, []);
   const toggle = (filter: string) => setFilters((current) => { const next = new Set(current); next.has(filter) ? next.delete(filter) : next.add(filter); return next; });
 
+  const onConfirmReport = async (reportId: string, turnstileToken: string) => {
+    // Optimistic Update: temporarily verify status locally
+    if (selected) {
+      setSelected(prev => prev ? { ...prev, status: "available" } : null);
+      setStations(prev => prev.map(s => s.id === selected.id ? { ...s, status: "available" } : s));
+    }
+    const res = await fetch(`/api/reports/${reportId}/confirm`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-device-id": getDeviceId()
+      },
+      body: JSON.stringify({ turnstileToken })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to confirm report.");
+    await fetchStations();
+  };
+
+  const onFlagReport = async (reportId: string, turnstileToken: string) => {
+    // Optimistic Update: temporarily dispute status locally
+    if (selected) {
+      setSelected(prev => prev ? { ...prev, status: "disputed" } : null);
+      setStations(prev => prev.map(s => s.id === selected.id ? { ...s, status: "disputed" } : s));
+    }
+    const res = await fetch(`/api/reports/${reportId}/flag`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-device-id": getDeviceId()
+      },
+      body: JSON.stringify({ turnstileToken })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to flag report.");
+    await fetchStations();
+  };
+
+  const onRateStation = async (stationId: string, score: number, turnstileToken: string) => {
+    // Optimistic Update: temporarily update average score locally
+    if (selected) {
+      setSelected(prev => prev ? { ...prev, ratingAverage: score } : null);
+      setStations(prev => prev.map(s => s.id === selected.id ? { ...s, ratingAverage: score } : s));
+    }
+    const res = await fetch(`/api/stations/${stationId}/rate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-device-id": getDeviceId()
+      },
+      body: JSON.stringify({ score, turnstileToken })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to submit rating.");
+    await fetchStations();
+  };
+
+  const onSubmitSuccess = async (data: any) => {
+    await fetchStations();
+    if (data.type === "add" && data.station) {
+      setSelected(data.station);
+      setPanelOpen(true);
+    }
+  };
+
   const routeDetails = useMemo(() => {
     if (!navigatingStation) return null;
     const distKm = getHaversineDistance(userLoc.lat, userLoc.lng, navigatingStation.lat, navigatingStation.lng);
@@ -58,5 +152,111 @@ export function ChargeMap() {
     return { distKm, timeMin, mapsUrl };
   }, [navigatingStation, userLoc]);
 
-  return <main className={panelOpen ? "mode-panel" : selected ? "mode-selected" : ""}><MapView stations={visible} selectedId={selected?.id ?? null} routeCoordinates={navigatingStation ? [[userLoc.lng, userLoc.lat], [navigatingStation.lng, navigatingStation.lat]] : null} onSelect={select} /><TopBar stations={stations} query={query} onQuery={setQuery} filters={filters} onFilter={toggle} onSelect={select} /><LegendStatusStack count={visible.length} /><StationPanel station={selected} open={panelOpen} onClose={() => setPanelOpen(false)} onReport={() => setReportOpen(true)} onNavigate={() => { setNavigatingStation(selected); setPanelOpen(false); }} /><DisclaimerBar onReport={() => setReportOpen(true)} /><ReportModal open={reportOpen} stationName={selected?.name} onClose={() => setReportOpen(false)} />{navigatingStation && routeDetails && <div id="route-preview-card" className="srf"><div className="rpc-title">{navigatingStation.name}</div><div className="rpc-meta"><span>Distance: <b>{routeDetails.distKm.toFixed(1)} km</b></span><span>Est. Time: <b>{routeDetails.timeMin} min</b></span></div><div className="rpc-approx">Approximate estimate assumes ~30 km/h average speed.</div><div style={{ display: "flex", gap: "8px" }}><button className="btn btn-pri" style={{ flex: 1 }} onClick={() => window.open(routeDetails.mapsUrl, "_blank")}>Confirm — Open in Maps</button><button className="btn" style={{ flex: "none", padding: "0 12px" }} onClick={() => setNavigatingStation(null)}>✕</button></div></div>}{visible.length === 0 && filters.size > 0 && <div id="empty-filters" className="srf show"><b>No stations match</b><p>Try removing a filter or widening the map view.</p><button className="btn btn-pri" style={{ width: "100%", justifyContent: "center" }} onClick={() => setFilters(new Set())}>Clear all filters</button></div>}</main>;
+  return (
+    <main className={panelOpen ? "mode-panel" : selected ? "mode-selected" : ""}>
+      <MapView
+        stations={visible}
+        selectedId={selected?.id ?? null}
+        routeCoordinates={navigatingStation ? [[userLoc.lng, userLoc.lat], [navigatingStation.lng, navigatingStation.lat]] : null}
+        onSelect={select}
+      />
+      <TopBar
+        stations={stations}
+        query={query}
+        onQuery={setQuery}
+        filters={filters}
+        onFilter={toggle}
+        onSelect={select}
+      />
+      <LegendStatusStack count={visible.length} />
+      
+      <StationPanel
+        station={selected}
+        open={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        onReport={() => {
+          setReportMode("report");
+          setReportOpen(true);
+        }}
+        onNavigate={() => {
+          setNavigatingStation(selected);
+          setPanelOpen(false);
+        }}
+        onConfirmReport={onConfirmReport}
+        onFlagReport={onFlagReport}
+        onRateStation={onRateStation}
+      />
+      
+      <DisclaimerBar onReport={() => {
+        setReportMode("report");
+        setReportOpen(true);
+      }} />
+      
+      <ReportModal
+        open={reportOpen}
+        mode={reportMode}
+        station={selected}
+        userLoc={userLoc}
+        onClose={() => setReportOpen(false)}
+        onSubmitSuccess={onSubmitSuccess}
+      />
+      
+      {navigatingStation && routeDetails && (
+        <div id="route-preview-card" className="srf">
+          <div className="rpc-title">{navigatingStation.name}</div>
+          <div className="rpc-meta">
+            <span>Distance: <b>{routeDetails.distKm.toFixed(1)} km</b></span>
+            <span>Est. Time: <b>{routeDetails.timeMin} min</b></span>
+          </div>
+          <div className="rpc-approx">Approximate estimate assumes ~30 km/h average speed.</div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button className="btn btn-pri" style={{ flex: 1 }} onClick={() => window.open(routeDetails.mapsUrl, "_blank")}>
+              Confirm — Open in Maps
+            </button>
+            <button className="btn" style={{ flex: "none", padding: "0 12px" }} onClick={() => setNavigatingStation(null)}>
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+      
+      {!navigatingStation && (
+        <button
+          id="btn-add-station"
+          className="btn btn-pri"
+          style={{
+            position: "fixed",
+            right: "12px",
+            bottom: "80px",
+            zIndex: 25,
+            borderRadius: "50%",
+            width: "44px",
+            height: "44px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "24px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)"
+          }}
+          onClick={() => {
+            setReportMode("add");
+            setReportOpen(true);
+          }}
+          title="Add Missing Station"
+        >
+          +
+        </button>
+      )}
+
+      {visible.length === 0 && filters.size > 0 && (
+        <div id="empty-filters" className="srf show">
+          <b>No stations match</b>
+          <p>Try removing a filter or widening the map view.</p>
+          <button className="btn btn-pri" style={{ width: "100%", justifyContent: "center" }} onClick={() => setFilters(new Set())}>
+            Clear all filters
+          </button>
+        </div>
+      )}
+    </main>
+  );
 }

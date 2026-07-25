@@ -39,6 +39,7 @@ type StationQueryRow = {
   stationConnectorType: string | null;
   precisionFlag: string | null;
   status: DisplayStatus | null;
+  latestReportId: string | null;
   reportConnectorType: string | null;
   coverPhotoUrl: string | null;
   statusUpdatedAt: Date | null;
@@ -59,6 +60,7 @@ type StationResponse = {
   connectorType?: string;
   precisionFlag?: string;
   status?: DisplayStatus;
+  latestReportId?: string;
   statusUpdatedAt?: string;
   coverPhotoUrl?: string;
   ratingAverage?: number;
@@ -125,6 +127,7 @@ function toStationResponse(row: StationQueryRow): StationResponse {
   if (row.statusUpdatedAt) station.statusUpdatedAt = row.statusUpdatedAt.toISOString();
   if (coverPhotoUrl) station.coverPhotoUrl = coverPhotoUrl;
   if (row.ratingAverage !== null) station.ratingAverage = row.ratingAverage;
+  if (row.latestReportId) station.latestReportId = row.latestReportId;
 
   return station;
 }
@@ -169,6 +172,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         WHEN latest_report.id IS NOT NULL THEN 'unconfirmed'
         ELSE NULL
       END AS status,
+      latest_report.id AS "latestReportId",
       latest_report.connector_type AS "reportConnectorType",
       latest_report.photo_url AS "coverPhotoUrl",
       latest_report.created_at AS "statusUpdatedAt",
