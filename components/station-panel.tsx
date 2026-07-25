@@ -29,6 +29,41 @@ export function StationPanel({
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleDirections = () => {
+    if (!station) return;
+    const isIOS = typeof navigator !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent);
+    const url = isIOS
+      ? `https://maps.apple.com/?daddr=${station.lat},${station.lng}`
+      : `https://www.google.com/maps/dir/?api=1&destination=${station.lat},${station.lng}`;
+    window.open(url, "_blank");
+  };
+
+  const handleShare = async () => {
+    if (!station) return;
+    const shareData = {
+      title: `${station.name} - EV Charging Station`,
+      text: `Check out ${station.name} charging station in ${station.address} via ChargeUndo!`,
+      url: typeof window !== "undefined" ? `${window.location.origin}/?id=${station.id}` : ""
+    };
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (e) {
+        console.log("Error sharing:", e);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (e) {
+        console.error("Clipboard copy failed:", e);
+      }
+    }
+  };
   
   const [showTurnstile, setShowTurnstile] = useState(false);
   const [pendingAction, setPendingAction] = useState<{
@@ -365,12 +400,49 @@ export function StationPanel({
           </div>
         )}
 
-        <div className="panel-actions" style={{ marginTop: "20px" }}>
-          <button className="btn btn-pri" onClick={onNavigate} disabled={loading || showTurnstile}>
-            ⌁ Navigate
+        <div className="panel-actions" style={{ marginTop: "20px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <button className="btn btn-pri" style={{ flex: 1, minWidth: "120px" }} onClick={handleDirections} disabled={loading || showTurnstile}>
+            ↗ Directions
           </button>
-          <button className="btn" onClick={onReport} disabled={loading || showTurnstile}>
-            ⚑ Report an issue
+          
+          {station.phone && (
+            <a
+              href={`tel:${station.phone}`}
+              className="btn"
+              style={{
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flex: "1 0 auto",
+                padding: "8px 12px"
+              }}
+            >
+              📞 Call
+            </a>
+          )}
+
+          <button
+            className="btn"
+            style={{
+              borderColor: isFavorite ? "var(--lime)" : undefined,
+              color: isFavorite ? "var(--lime)" : undefined,
+              background: isFavorite ? "rgba(198, 255, 61, 0.08)" : undefined
+            }}
+            onClick={onToggleFavorite}
+            disabled={loading || showTurnstile}
+          >
+            {isFavorite ? "♥ Favorited" : "♡ Favorite"}
+          </button>
+
+          <button className="btn" onClick={handleShare} disabled={loading || showTurnstile}>
+            {copied ? "✓ Copied!" : "🔗 Share"}
+          </button>
+        </div>
+
+        <div className="panel-actions-sub" style={{ marginTop: "10px" }}>
+          <button className="btn" style={{ width: "100%", justifyContent: "center" }} onClick={onReport} disabled={loading || showTurnstile}>
+            ⚑ Report incorrect details / status
           </button>
         </div>
       </div>
