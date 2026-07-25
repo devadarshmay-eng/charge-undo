@@ -42,6 +42,10 @@ export function ChargeMap() {
   const [reportMode, setReportMode] = useState<"report" | "add">("report");
   const [navigatingStation, setNavigatingStation] = useState<Station | null>(null);
   const [userLoc, setUserLoc] = useState(DEFAULT_USER_LOCATION);
+  
+  // Viewport tracking & sparse density banner states
+  const [mapCenter, setMapCenter] = useState(DEFAULT_USER_LOCATION);
+  const [dismissedCenter, setDismissedCenter] = useState<{ lat: number; lng: number } | null>(null);
 
   const fetchStations = useCallback(async () => {
     try {
@@ -66,6 +70,7 @@ export function ChargeMap() {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          setMapCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         },
         (err) => console.log("Geolocation error, using default: ", err)
       );
@@ -77,7 +82,6 @@ export function ChargeMap() {
   const toggle = (filter: string) => setFilters((current) => { const next = new Set(current); next.has(filter) ? next.delete(filter) : next.add(filter); return next; });
 
   const onConfirmReport = async (reportId: string, turnstileToken: string) => {
-    // Optimistic Update: temporarily verify status locally
     if (selected) {
       setSelected(prev => prev ? { ...prev, status: "available" } : null);
       setStations(prev => prev.map(s => s.id === selected.id ? { ...s, status: "available" } : s));
@@ -96,7 +100,6 @@ export function ChargeMap() {
   };
 
   const onFlagReport = async (reportId: string, turnstileToken: string) => {
-    // Optimistic Update: temporarily dispute status locally
     if (selected) {
       setSelected(prev => prev ? { ...prev, status: "disputed" } : null);
       setStations(prev => prev.map(s => s.id === selected.id ? { ...s, status: "disputed" } : s));
@@ -115,7 +118,6 @@ export function ChargeMap() {
   };
 
   const onRateStation = async (stationId: string, score: number, turnstileToken: string) => {
-    // Optimistic Update: temporarily update average score locally
     if (selected) {
       setSelected(prev => prev ? { ...prev, ratingAverage: score } : null);
       setStations(prev => prev.map(s => s.id === selected.id ? { ...s, ratingAverage: score } : s));
@@ -152,6 +154,26 @@ export function ChargeMap() {
     return { distKm, timeMin, mapsUrl };
   }, [navigatingStation, userLoc]);
 
+  // Compute pin density around mapCenter (radius 10km)
+  const density = useMemo(() => {
+    let count = 0;
+    for (const s of stations) {
+      const dist = getHaversineDistance(mapCenter.lat, mapCenter.lng, s.lat, s.lng);
+      if (dist <= 10) count++;
+    }
+    return count;
+  }, [stations, mapCenter]);
+
+  // Check if sparse density banner should show
+  const showBanner = useMemo(() => {
+    if (density >= 3) return false;
+    if (dismissedCenter) {
+      const dist = getHaversineDistance(dismissedCenter.lat, dismissedCenter.lng, mapCenter.lat, mapCenter.lng);
+      if (dist < 10) return false;
+    }
+    return true;
+  }, [density, dismissedCenter, mapCenter]);
+
   return (
     <main className={panelOpen ? "mode-panel" : selected ? "mode-selected" : ""}>
       <MapView
@@ -159,6 +181,7 @@ export function ChargeMap() {
         selectedId={selected?.id ?? null}
         routeCoordinates={navigatingStation ? [[userLoc.lng, userLoc.lat], [navigatingStation.lng, navigatingStation.lat]] : null}
         onSelect={select}
+        onViewportChange={setMapCenter}
       />
       <TopBar
         stations={stations}
@@ -196,10 +219,49 @@ export function ChargeMap() {
         open={reportOpen}
         mode={reportMode}
         station={selected}
-        userLoc={userLoc}
+        userLoc={reportMode === "add" ? mapCenter : userLoc}
         onClose={() => setReportOpen(false)}
         onSubmitSuccess={onSubmitSuccess}
       />
+
+      {showBanner && (
+        <div
+          className="srf"
+          style={{
+            position: "fixed",
+            top: "108px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 25,
+            padding: "10px 16px",
+            borderRadius: "20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            fontSize: "12px",
+            fontWeight: "500",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.25)"
+          }}
+        >
+          <span>📍 Not many stations here — be the first to add one</span>
+          <button
+            className="btn btn-pri"
+            style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "10px" }}
+            onClick={() => {
+              setReportMode("add");
+              setReportOpen(true);
+            }}
+          >
+            Add Station
+          </button>
+          <button
+            onClick={() => setDismissedCenter(mapCenter)}
+            style={{ background: "none", border: "none", color: "var(--dim)", cursor: "pointer", fontSize: "14px", padding: "0 4px" }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
       
       {navigatingStation && routeDetails && (
         <div id="route-preview-card" className="srf">

@@ -5,16 +5,23 @@ import { Map, Marker, ScaleControl, GeoJSONSource } from "maplibre-gl";
 import { useEffect, useRef } from "react";
 import type { Station } from "./station-types";
 
-type MapViewProps = { stations: Station[]; selectedId: string | null; routeCoordinates: [number, number][] | null; onSelect: (station: Station) => void };
+type MapViewProps = { stations: Station[]; selectedId: string | null; routeCoordinates: [number, number][] | null; onSelect: (station: Station) => void; onViewportChange: (center: { lat: number; lng: number }) => void };
 const colors: Record<string, string> = { available: "#C6FF3D", occupied: "#B6A3FF", broken: "#FF5C5C", missing: "#FF5C5C", other: "#9CA3AF", unconfirmed: "#B6A3FF", disputed: "#FF5C5C" };
 
-export function MapView({ stations, selectedId, routeCoordinates, onSelect }: MapViewProps) {
+export function MapView({ stations, selectedId, routeCoordinates, onSelect, onViewportChange }: MapViewProps) {
   const host = useRef<HTMLDivElement>(null); const map = useRef<Map | null>(null); const markers = useRef<Marker[]>([]);
   useEffect(() => {
     if (!host.current || map.current) return;
     map.current = new Map({ container: host.current, style: "https://tiles.openfreemap.org/styles/dark", center: [76.4, 10.45], zoom: 7.4, pitch: 46, bearing: -16 });
     map.current.addControl(new ScaleControl({ maxWidth: 100, unit: "metric" }), "bottom-left");
     
+    map.current.on("moveend", () => {
+      if (map.current) {
+        const center = map.current.getCenter();
+        onViewportChange({ lat: center.lat, lng: center.lng });
+      }
+    });
+
     map.current.on("load", () => {
       if (!map.current) return;
       map.current.addSource("route", {
@@ -35,6 +42,8 @@ export function MapView({ stations, selectedId, routeCoordinates, onSelect }: Ma
         layout: { "line-join": "round", "line-cap": "round" },
         paint: { "line-color": "#5B9BF8", "line-width": 3.5 }
       });
+      const center = map.current.getCenter();
+      onViewportChange({ lat: center.lat, lng: center.lng });
     });
 
     return () => map.current?.remove();
