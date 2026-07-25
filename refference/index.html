@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#111315" />
-<title>VoltNav — EV Charging Network</title>
+<title>ChargeUndo — EV Charging Network</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -329,34 +329,15 @@ body.mode-search #disclaimer{  opacity:.2 }
 #offline-banner svg{width:13px;height:13px}
 
 /* ============================================================
-   NAV HUD + ARRIVAL
+   ROUTE PREVIEW CARD
 ============================================================ */
-#nav-hud{position:fixed;top:12px;left:12px;right:12px;z-index:40;display:none;flex-direction:column;gap:8px;max-width:560px}
-@media(min-width:768px){#nav-hud{left:16px;right:auto;width:420px}}
-body.navigating #nav-hud{display:flex}
-.nh-card{border-radius:14px;padding:12px 14px;display:flex;gap:12px;align-items:center;overflow:hidden;position:relative}
-.nh-turn{width:44px;height:44px;border-radius:11px;background:var(--blue);display:flex;align-items:center;justify-content:center;flex:none;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 4px 12px -3px rgba(59,130,246,.6)}
-.nh-turn svg{width:22px;height:22px;color:#fff}
-.nh-dist{font:700 22px/1 var(--disp);letter-spacing:-.01em}
-.nh-instr{font-size:12.5px;color:var(--mut);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nh-x{margin-left:auto;flex:none;width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-  color:var(--red);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);transition:background .15s}
-.nh-x:hover{background:rgba(239,68,68,.2)}
-.nh-x svg{width:15px;height:15px}
-.nh-prog{position:absolute;left:0;bottom:0;height:2.5px;background:var(--blue);width:100%;transform-origin:left;
-  animation:prog 90s linear forwards}
-@keyframes prog{to{transform:scaleX(0)}}
-#arrival-card{position:fixed;left:12px;right:12px;bottom:14px;z-index:40;display:none;border-radius:13px;padding:10px 16px;
-  align-items:center;gap:16px}
-@media(min-width:768px){#arrival-card{left:auto;right:16px;bottom:16px;width:auto}}
-body.navigating #arrival-card{display:flex}
-.arr-eta b{display:block;font:700 26px/1 var(--disp);color:var(--green);letter-spacing:-.02em}
-.arr-eta span{display:block;font-size:9.5px;font-weight:600;color:var(--dim);margin-top:3px;letter-spacing:.08em;text-transform:uppercase}
-.arr-div{width:1px;height:30px;background:var(--line-2)}
-.arr-rest{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:9px}
-.arr-rest b{color:var(--text);font:600 12px var(--disp)}
-.arr-rest>i{width:1px;height:12px;background:var(--line-2)}
+#route-preview-card{position:fixed;top:12px;left:12px;right:12px;z-index:40;display:none;flex-direction:column;gap:10px;max-width:560px;padding:14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(16px);box-shadow:0 4px 16px #0004}
+@media(min-width:768px){#route-preview-card{left:16px;right:auto;width:380px}}
+body.navigating #route-preview-card{display:flex}
+.rpc-title{font:600 16px/1.2 var(--disp);color:var(--text)}
+.rpc-meta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut)}
+.rpc-meta b{color:var(--text)}
+.rpc-approx{font-size:10px;color:var(--dim);font-style:italic}
 
 /* ============================================================
    PREVIEW CARD (desktop / mobile-inline)
@@ -643,24 +624,9 @@ body.ready .chrome{opacity:1;transform:none}
   <span class="pill"><span class="pd"></span><span id="live-count" class="tnum">–</span>&nbsp;live hubs</span>
 </div>
 <div id="offline-banner"><i data-lucide="wifi-off"></i><span>Offline — showing cached station data</span></div>
+<div id="route-preview-card" class="srf"></div>
 
-<!-- NAV HUD -->
-<div id="nav-hud">
-  <div class="nh-card srf">
-    <div class="nh-turn"><i data-lucide="corner-up-right"></i></div>
-    <div style="min-width:0">
-      <div class="nh-dist disp tnum" id="nh-dist">400 m</div>
-      <div class="nh-instr" id="nh-instr">Turn right onto Grand Avenue</div>
-    </div>
-    <button class="nh-x" id="btn-exit-nav" title="End route"><i data-lucide="x"></i></button>
-    <span class="nh-prog" id="nh-prog"></span>
-  </div>
-</div>
-<div id="arrival-card" class="srf">
-  <div class="arr-eta"><b id="arr-eta" class="tnum">–</b><span>ETA <span id="arr-clock">–</span></span></div>
-  <i class="arr-div"></i>
-  <div class="arr-rest"><span id="arr-dist" class="tnum">–</span><i></i><span>Charge at arrival <b id="arr-soc" class="tnum">–</b></span></div>
-</div>
+
 
 <!-- PREVIEW CARD -->
 <div id="preview" class="chrome" style="transition-delay:.22s"><div class="pv srf" id="pv-card"></div></div>
@@ -721,7 +687,6 @@ body.ready .chrome{opacity:1;transform:none}
           <button class="rep-reason" data-reason="broken"><i data-lucide="wrench" style="color:var(--amber)"></i>Broken connector</button>
           <button class="rep-reason" data-reason="occupied"><i data-lucide="car" style="color:var(--amber)"></i>Blocked / occupied</button>
           <button class="rep-reason" data-reason="location"><i data-lucide="map-pin-off" style="color:var(--blue)"></i>Wrong location</button>
-          <button class="rep-reason" data-reason="pricing"><i data-lucide="circle-dollar-sign" style="color:var(--amber)"></i>Incorrect pricing</button>
           <button class="rep-reason" data-reason="other"><i data-lucide="message-square" style="color:var(--mut)"></i>Something else</button>
         </div>
       </div>
@@ -753,7 +718,7 @@ body.ready .chrome{opacity:1;transform:none}
 
 <script>
 /* ================================================================
-   VOLTNAV — map-first EV mobility client
+   CHARGEUNDO — map-first EV mobility client
 ================================================================ */
 'use strict';
 const $ = s => document.querySelector(s);
@@ -1063,32 +1028,14 @@ function ensureRouteLayers(){
   routeReady=true;
   if(current) animateRouteTo(STATIONS.find(s=>s.id===current), true);
 }
-function routeCurve(to){
-  const from=[USER.lng,USER.lat];
-  const dx=to.lng-from[0], dy=to.lat-from[1];
-  const mid=[from[0]+dx*0.42-dy*0.22, from[1]+dy*0.45+dx*0.16];
-  const N=56, pts=[];
-  for(let i=0;i<=N;i++){ const t=i/N, u=1-t;
-    pts.push([u*u*from[0]+2*u*t*mid[0]+t*t*to.lng, u*u*from[1]+2*u*t*mid[1]+t*t*to.lat]); }
-  return pts;
-}
 function animateRouteTo(s, instant){
   if(!routeReady) return;
+  const src=map.getSource('route'); if(!src) return;
   if(!s){
-    const src=map.getSource('route');
-    if(src) src.setData({type:'Feature',geometry:{type:'LineString',coordinates:[]}});
+    src.setData({type:'Feature',geometry:{type:'LineString',coordinates:[]}});
     return;
   }
-  const pts=routeCurve(s), N=pts.length-1;
-  const src=map.getSource('route'); if(!src) return;
-  cancelAnimationFrame(rafRoute);
-  if(instant){ src.setData({type:'Feature',geometry:{type:'LineString',coordinates:pts}}); return; }
-  const t0=performance.now(), dur=850;
-  (function frame(t){
-    const k=easeIO(clamp((t-t0)/dur,0,1));
-    src.setData({type:'Feature',geometry:{type:'LineString',coordinates:pts.slice(0,Math.max(2,Math.round(k*N)+1))}});
-    if(k<1) rafRoute=requestAnimationFrame(frame);
-  })(t0);
+  src.setData({type:'Feature',geometry:{type:'LineString',coordinates:[[USER.lng, USER.lat], [s.lng, s.lat]]}});
 }
 
 /* ================================================================
@@ -1356,9 +1303,16 @@ matchMedia('(max-width:767px)').addEventListener?.('change',()=>{
   else{ p.style.transform=''; if(panelOpen) p.classList.add('open'); }
 });
 
-/* ================================================================
-   NAVIGATION MODE
-================================================================ */
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 let navTimer=0;
 function startNav(){
   const s=STATIONS.find(x=>x.id===current); if(!s) return;
@@ -1367,37 +1321,36 @@ function startNav(){
   document.body.classList.add('navigating');
   setMode('nav');
   $('#preview').classList.add('hide');
-  animateRouteTo(s,false);
-  $('#nh-dist').textContent=s.distTxt;
-  $('#nh-instr').textContent=`Head toward ${s.name} via ${s.addr.split(',')[0]}`;
-  $('#nh-prog').style.animation='none'; void $('#nh-prog').offsetWidth; $('#nh-prog').style.animation='';
-  const now=new Date(Date.now()+s.min*60000);
-  $('#arr-eta').textContent=s.min+' min';
-  $('#arr-clock').textContent=now.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
-  $('#arr-dist').textContent=s.distTxt;
-  $('#arr-soc').textContent=Math.max(4,68-Math.round(s.km*2.1))+'%';
-  /* destination pin */
-  if(vehMarker) vehMarker.remove();
-  const dp=document.createElement('div'); dp.className='dpin pop';
-  dp.innerHTML='<div class="dpin-body"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg></div><div class="dpin-shadow"></div>';
-  vehMarker=new maplibregl.Marker({element:dp,anchor:'center'}).setLngLat([s.lng,s.lat]).addTo(map);
-  map.flyTo({center:[s.lng,s.lat],zoom:16.4,pitch:62,bearing:38,duration:1500,essential:true,padding:{top:110,bottom:140,left:30,right:30}});
-  toast('Guidance started','info');
-  /* gentle camera drift while "driving" */
-  clearInterval(navTimer);
-  let brg=38;
-  navTimer=setInterval(()=>{ brg+=0.8; map.easeTo({bearing:brg%360,duration:1800,easing:t=>t}); },1900);
+  animateRouteTo(s,true);
+  
+  const distKm = haversine(USER.lat, USER.lng, s.lat, s.lng);
+  const timeMin = Math.round(distKm * 2);
+  
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const mapsUrl = isIOS 
+    ? `maps://?daddr=${s.lat},${s.lng}`
+    : `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`;
+  
+  const card = $('#route-preview-card');
+  card.innerHTML = `
+    <div class="rpc-title">${s.name}</div>
+    <div class="rpc-meta">
+      <span>Distance: <b>${distKm.toFixed(1)} km</b></span>
+      <span>Est. Time: <b>${timeMin} min</b></span>
+    </div>
+    <div class="rpc-approx">Approximate estimate assumes ~30 km/h average speed.</div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="btn btn-pri" style="flex:1;" onclick="window.open('${mapsUrl}', '_blank')">Confirm — Open in Maps</button>
+      <button class="btn" style="flex:none; padding:0 12px;" onclick="endNav()">✕</button>
+    </div>
+  `;
 }
 function endNav(){
   document.body.classList.remove('navigating');
-  clearInterval(navTimer);
   setMode(current?'selected':'idle');
   $('#preview').classList.remove('hide');
-  if(vehMarker){ vehMarker.remove(); vehMarker=null; }
-  if(mapReady) map.flyTo({center:[USER.lng,USER.lat],zoom:13.6,pitch:44,bearing:-14,duration:1100,essential:true,padding:panelPad()});
-  toast('Route ended','ok');
+  animateRouteTo(null,true);
 }
-$('#btn-exit-nav').onclick=endNav;
 
 /* ================================================================
    SEARCH
@@ -1483,7 +1436,7 @@ function toggleFav(s){
 }
 $('#cv-fav').onclick=()=>{ const s=STATIONS.find(x=>x.id===current); if(s) toggleFav(s); };
 function share(s){
-  navigator.clipboard?.writeText(`https://voltnav.app/s/${s.id}`);
+  navigator.clipboard?.writeText(`https://chargeundo.app/s/${s.id}`);
   toast('Link copied to clipboard','ok');
 }
 $('#cv-share').onclick=()=>{ const s=STATIONS.find(x=>x.id===current); if(s) share(s); };
