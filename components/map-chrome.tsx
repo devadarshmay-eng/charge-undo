@@ -1,0 +1,3 @@
+"use client";
+export function LegendStatusStack({ count }: { count: number }) { return <><aside id="rail"><div className="rail-grp"><button aria-label="Zoom in">+</button><button aria-label="Zoom out">−</button><button className="on" aria-label="Toggle 3D">3D</button></div><div className="rail-grp"><button aria-label="Locate">⌖</button></div></aside><div id="statusstack"><span className="pill"><i className="pd" />{count} stations</span><span className="pill"><i className="pd" />GPS · ±8 m</span></div></>; }
+export function DisclaimerBar({ onReport }: { onReport: () => void }) { return <footer id="disclaimer">Community-powered availability data. Always verify before you drive. <button onClick={onReport}>Report an issue</button></footer>; }

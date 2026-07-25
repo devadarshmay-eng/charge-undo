@@ -1,0 +1,792 @@
+[
+  {
+    "name": "V8 Car Spa EV Charging Station, Thrissur",
+    "address": "Thrissur",
+    "lat": 10.5214,
+    "lng": 76.2306,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD"
+  },
+  {
+    "name": "KSEB Substation Charging Station, Vyttila, Kochi",
+    "address": "Vyttila, Kochi",
+    "lat": 9.9678,
+    "lng": 76.3218,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "ANERT EESL EV Charging Hub, Chittur, Palakkad",
+    "address": "Chittur, Palakkad",
+    "lat": 10.6974,
+    "lng": 76.7119,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "ANERT / EESL"
+  },
+  {
+    "name": "KSEB Vydyuthi Bhavan Charging Station, Thrissur",
+    "address": "Thrissur",
+    "lat": 10.5189,
+    "lng": 76.2163,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "Zeon Charging Station, Nesto Hypermarket, Kottakkal",
+    "address": "Nesto Hypermarket, Kottakkal",
+    "lat": 10.9996,
+    "lng": 75.9922,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "GO EC Oasis EV Super Charging Station, Mannarkkad",
+    "address": "Mannarkkad",
+    "lat": 10.9856,
+    "lng": 76.4953,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "Tata Power IOCL Aaditya Petroleum, Wandoor",
+    "address": "Wandoor",
+    "lat": 11.1942,
+    "lng": 76.2238,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "ChargeMOD Chinnakada, Kollam",
+    "address": "Kollam",
+    "lat": 8.8894,
+    "lng": 76.5898,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD"
+  },
+  {
+    "name": "KSEB EV Charging Station, Kanipayyur, Kunnamkulam",
+    "address": "Kanipayyur, Kunnamkulam",
+    "lat": 10.6402,
+    "lng": 76.0527,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "Zeon Charging Hub, Club Sulaimani, Kottakkal",
+    "address": "Club Sulaimani, Kottakkal",
+    "lat": 10.9754,
+    "lng": 75.9894,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "KSEB Electrical Section, Cherthala, Alappuzha",
+    "address": "Cherthala, Alappuzha",
+    "lat": 9.6823,
+    "lng": 76.3414,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "Zeon Charging Station, HiLITE Mall, Kozhikode",
+    "address": "HiLITE Mall, Kozhikode",
+    "lat": 11.2548,
+    "lng": 75.8361,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "GO EC Highway Charging Station, Ambalapuzha",
+    "address": "Ambalapuzha",
+    "lat": 9.3905,
+    "lng": 76.3718,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "Tata Power Charging Station, Poojappura, Thiruvananthapuram",
+    "address": "Poojappura, Thiruvananthapuram",
+    "lat": 8.4912,
+    "lng": 76.9698,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "BPCL Fuel Station E-Drive Point, Cheppad, Alappuzha",
+    "address": "Cheppad, Alappuzha",
+    "lat": 9.2274,
+    "lng": 76.4719,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "BPCL"
+  },
+  {
+    "name": "KSEB Section Office Charging Hub, Kochuveli, Thiruvananthapuram",
+    "address": "Kochuveli, Thiruvananthapuram",
+    "lat": 8.4981,
+    "lng": 76.9032,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "Tata Power Charging Station, Focus Mall, Kozhikode",
+    "address": "Focus Mall, Kozhikode",
+    "lat": 11.2589,
+    "lng": 75.7874,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "GO EC EV Charging Station, Bypass Road, Kannur",
+    "address": "Bypass Road, Kannur",
+    "lat": 11.8791,
+    "lng": 75.3742,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "BPCL Ghar Outlets Charging Station, Shoranur, Palakkad",
+    "address": "Shoranur, Palakkad",
+    "lat": 10.7624,
+    "lng": 76.2731,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "BPCL"
+  },
+  {
+    "name": "ChargeMOD Hub, Kakkanad, Ernakulam",
+    "address": "Kakkanad, Ernakulam",
+    "lat": 10.0028,
+    "lng": 76.3531,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD"
+  },
+  {
+    "name": "KSEB Electrical Section, Palarivattom, Kochi",
+    "address": "Palarivattom, Kochi",
+    "lat": 10.0036,
+    "lng": 76.3075,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "Zeon Charging Station, Grand Mall, Edappally, Kochi",
+    "address": "Grand Mall, Edappally, Kochi",
+    "lat": 10.0249,
+    "lng": 76.3078,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "GO EC EV Charging Station, Oberon Mall, Edappally",
+    "address": "Oberon Mall, Edappally",
+    "lat": 10.0118,
+    "lng": 76.3114,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "Tata Power Charging Station, Pulichode Signal, Aluva",
+    "address": "Pulichode Signal, Aluva",
+    "lat": 10.1194,
+    "lng": 76.3475,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "Zeon Charging Station, Annapoorna Cafe, Karukutty",
+    "address": "Annapoorna Cafe, Karukutty",
+    "lat": 10.2319,
+    "lng": 76.3861,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "ChargeMOD Charging Station, Technopark Campus, Kazhakkoottam",
+    "address": "Technopark Campus, Kazhakkoottam",
+    "lat": 8.5574,
+    "lng": 76.8778,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD"
+  },
+  {
+    "name": "KSEB Charging Station, Bakery Junction Road, Nandavanam, Thiruvananthapuram",
+    "address": "Bakery Junction Road, Nandavanam, Thiruvananthapuram",
+    "lat": 8.4994,
+    "lng": 76.9536,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "ChargeMOD KSEB Vellayil EV Charging Station, Kozhikode",
+    "address": "Kozhikode",
+    "lat": 11.2678,
+    "lng": 75.7725,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD (KSEB Hub)"
+  },
+  {
+    "name": "Zeon 120kW Fast Charging Station, Kozhikode Bypass, Pantheeramkavu",
+    "address": "Kozhikode Bypass, Pantheeramkavu",
+    "lat": 11.2486,
+    "lng": 75.8344,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "BPCL Fuel Station E-Drive Point, Cheruvathur, Kasaragod",
+    "address": "Cheruvathur, Kasaragod",
+    "lat": 12.2178,
+    "lng": 75.1611,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "BPCL"
+  },
+  {
+    "name": "GO EC Ultra 80 kW EVCS, Crowne Plaza, Maradu, Kochi",
+    "address": "Crowne Plaza, Maradu, Kochi",
+    "lat": 9.9324,
+    "lng": 76.3219,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "Zeon Charging Station, Joance Regency, Thodupuzha",
+    "address": "Joance Regency, Thodupuzha",
+    "lat": 9.8941,
+    "lng": 76.7025,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "KSEB Electrical Section Office Charging Station, Vadakkenchery",
+    "address": "Vadakkenchery",
+    "lat": 10.5975,
+    "lng": 76.5164,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "Tata Power Sigma Enterprises Charging Station, Valanchery",
+    "address": "Valanchery",
+    "lat": 10.9238,
+    "lng": 76.0125,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "GO EC EV Charging Hub, VPS Lakeshore Hospital, Nettoor, Kochi",
+    "address": "VPS Lakeshore Hospital, Nettoor, Kochi",
+    "lat": 9.9192,
+    "lng": 76.3142,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "Zeon 24kW Fast Charging Station, Mundakayam",
+    "address": "Mundakayam",
+    "lat": 9.5414,
+    "lng": 76.8833,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "BPCL Fuel Station E-Drive Point, Mundakayam, Kottayam",
+    "address": "Mundakayam, Kottayam",
+    "lat": 9.5397,
+    "lng": 76.8812,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "BPCL"
+  },
+  {
+    "name": "ChargeMOD Changathikoottam EVCS, Nenmara, Palakkad",
+    "address": "Nenmara, Palakkad",
+    "lat": 10.5833,
+    "lng": 76.5986,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD"
+  },
+  {
+    "name": "GO EC Amala Smart EVCS, Peramangalam, Thrissur",
+    "address": "Peramangalam, Thrissur",
+    "lat": 10.6019,
+    "lng": 76.1772,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "Zeon Charging Station, Baboos Triangle, Kunnamkulam",
+    "address": "Baboos Triangle, Kunnamkulam",
+    "lat": 10.6553,
+    "lng": 76.0494,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "KSEB Electrical Section Charging Station, Kattappana, Idukki",
+    "address": "Kattappana, Idukki",
+    "lat": 9.7128,
+    "lng": 77.1189,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "Tata Power Charging Hub, Tea County Resort, Munnar",
+    "address": "Tea County Resort, Munnar",
+    "lat": 10.0889,
+    "lng": 77.0594,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "GO EC Mountain High EVCS, Near KSRTC, Munnar",
+    "address": "Near KSRTC, Munnar",
+    "lat": 10.0903,
+    "lng": 77.0622,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "BPCL Fuel Station E-Drive Point, Marayoor, Idukki",
+    "address": "Marayoor, Idukki",
+    "lat": 10.2748,
+    "lng": 77.1511,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "BPCL"
+  },
+  {
+    "name": "ChargeMOD EV Hub, Near KSRTC Bus Stand, Perumbavoor",
+    "address": "Near KSRTC Bus Stand, Perumbavoor",
+    "lat": 10.1147,
+    "lng": 76.4825,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD"
+  },
+  {
+    "name": "Tata Power Charging Station, Hotel Highway Castle, Angamaly",
+    "address": "Hotel Highway Castle, Angamaly",
+    "lat": 10.2319,
+    "lng": 76.3861,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "GO EC EV Charging Station, Thalassery Bypass, Kannur",
+    "address": "Thalassery Bypass, Kannur",
+    "lat": 11.7256,
+    "lng": 75.5414,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "BPCL Ghar Outlet Charging Hub, Ramanattukara, Kozhikode",
+    "address": "Ramanattukara, Kozhikode",
+    "lat": 11.1714,
+    "lng": 75.8622,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "BPCL"
+  },
+  {
+    "name": "ChargeMOD KSEB Section Office Station, Nilambur, Malappuram",
+    "address": "Nilambur, Malappuram",
+    "lat": 11.2753,
+    "lng": 76.2247,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD (KSEB Hub)"
+  },
+  {
+    "name": "Zeon Charging Station, Hotel Rydges Anand, Sulthan Bathery, Wayanad",
+    "address": "Hotel Rydges Anand, Sulthan Bathery, Wayanad",
+    "lat": 11.6622,
+    "lng": 76.2575,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "KSEB Electrical Section Charging Station, Kalpetta, Wayanad",
+    "address": "Kalpetta, Wayanad",
+    "lat": 11.6062,
+    "lng": 76.0848,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "Tata Power Charging Hub, Vythiri Resort, Wayanad",
+    "address": "Vythiri Resort, Wayanad",
+    "lat": 11.5398,
+    "lng": 76.0403,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "GO EC EV Charging Station, Kanhangad, Kasaragod",
+    "address": "Kanhangad, Kasaragod",
+    "lat": 12.3045,
+    "lng": 75.0934,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "BPCL Fuel Station E-Drive Point, Nileshwar, Kasaragod",
+    "address": "Nileshwar, Kasaragod",
+    "lat": 12.2536,
+    "lng": 75.1278,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "BPCL"
+  },
+  {
+    "name": "ChargeMOD EV Hub, Near New Bus Stand, Thalassery",
+    "address": "Near New Bus Stand, Thalassery",
+    "lat": 11.7512,
+    "lng": 75.4952,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD"
+  },
+  {
+    "name": "Tata Power Charging Hub, Hotel Pegasus Continental, Karunagappally",
+    "address": "Hotel Pegasus Continental, Karunagappally",
+    "lat": 9.0556,
+    "lng": 76.5361,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "GO EC EV Charging Station, Muvattupuzha Bypass, Ernakulam",
+    "address": "Muvattupuzha Bypass, Ernakulam",
+    "lat": 9.9882,
+    "lng": 76.6234,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "BPCL Ghar Outlet Charging Hub, Kayamkulam, Alappuzha",
+    "address": "Kayamkulam, Alappuzha",
+    "lat": 9.1724,
+    "lng": 76.5056,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "BPCL"
+  },
+  {
+    "name": "ChargeMOD KSEB Section Office Station, Pathanamthitta Town",
+    "address": "Pathanamthitta Town",
+    "lat": 9.2662,
+    "lng": 76.7865,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD (KSEB Hub)"
+  },
+  {
+    "name": "Zeon Charging Station, Hotel Orchid Residency, Kottayam",
+    "address": "Hotel Orchid Residency, Kottayam",
+    "lat": 9.5786,
+    "lng": 76.5222,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Zeon Charging"
+  },
+  {
+    "name": "KSEB Electrical Section Charging Hub, Adoor, Pathanamthitta",
+    "address": "Adoor, Pathanamthitta",
+    "lat": 9.1554,
+    "lng": 76.7262,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "KSEB (chargeMOD)"
+  },
+  {
+    "name": "Tata Power Charging Hub, Abad Whispering Palms, Kumarakom",
+    "address": "Abad Whispering Palms, Kumarakom",
+    "lat": 9.5931,
+    "lng": 76.4253,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "GO EC EV Charging Station, Punalur, Kollam",
+    "address": "Punalur, Kollam",
+    "lat": 9.0142,
+    "lng": 76.9248,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "BPCL Fuel Station E-Drive Point, Chadayamangalam, Kollam",
+    "address": "Chadayamangalam, Kollam",
+    "lat": 8.8682,
+    "lng": 76.8661,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "BPCL"
+  },
+  {
+    "name": "ChargeMOD EV Charging Hub, Near Private Bus Stand, Attingal",
+    "address": "Near Private Bus Stand, Attingal",
+    "lat": 8.6814,
+    "lng": 76.8189,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD"
+  },
+  {
+    "name": "Tata Power Charging Hub, KTDC Grand Chaithram, Thiruvananthapuram Central",
+    "address": "KTDC Grand Chaithram, Thiruvananthapuram Central",
+    "lat": 8.4878,
+    "lng": 76.9514,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Tata Power"
+  },
+  {
+    "name": "Plugeasy EV Charging Hub, Lulu Mall Parking, Edappally, Kochi",
+    "address": "Lulu Mall Parking, Edappally, Kochi",
+    "lat": 10.0278,
+    "lng": 76.3114,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Plugeasy"
+  },
+  {
+    "name": "VeChaarge EV Charging Hub, MG Road, Ernakulam",
+    "address": "MG Road, Ernakulam",
+    "lat": 9.9624,
+    "lng": 76.2848,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "VeChaarge"
+  },
+  {
+    "name": "IONGRID Fast Charging Hub, NH Bypass, Vyttila, Kochi",
+    "address": "NH Bypass, Vyttila, Kochi",
+    "lat": 9.9723,
+    "lng": 76.3214,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "IONGRID"
+  },
+  {
+    "name": "Mercedes-Benz Coastal India EV Fast Charger, Nettoor, Kochi",
+    "address": "Nettoor, Kochi",
+    "lat": 9.9197,
+    "lng": 76.3152,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "Mercedes-Benz (Public Accessible)"
+  },
+  {
+    "name": "IOCL Fuel Station EV Point, Kazhakkoottam, Thiruvananthapuram",
+    "address": "Kazhakkoottam, Thiruvananthapuram",
+    "lat": 8.5684,
+    "lng": 76.8732,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "IOCL"
+  },
+  {
+    "name": "ANERT Public EV Charging Hub, Vikas Bhavan, Thiruvananthapuram",
+    "address": "Vikas Bhavan, Thiruvananthapuram",
+    "lat": 8.5081,
+    "lng": 76.9452,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "ANERT"
+  },
+  {
+    "name": "chargeMOD Charging Station",
+    "address": "RR5W+PC2, Vadakarapathy, Velanthavalam, Kerala 678557",
+    "lat": 10.7985,
+    "lng": 76.7797,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD"
+  },
+  {
+    "name": "chargeMOD Charging Station",
+    "address": "MI Towers, CV Junction, Ponnani, Kerala 679577",
+    "lat": 10.7745,
+    "lng": 75.9237,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "chargeMOD"
+  },
+  {
+    "name": "Goec Charging Station",
+    "address": "Hotel Hill View, Moolakadai, Munnar, Kerala 685612",
+    "lat": 10.0914,
+    "lng": 77.0612,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "GOEC Charging Station",
+    "address": "Old MC Road, Kodimatha, Kottayam, Kerala 686013",
+    "lat": 9.5824,
+    "lng": 76.5221,
+    "phone": "N/A",
+    "website": "N/A",
+    "hours": "N/A",
+    "operator": "GO EC"
+  },
+  {
+    "name": "Automation Gallery Private Limited",
+    "address": "Underground floor, 23/623, Kizhakkekara Arcade, Near Aluva Market Road, Aluva, Ernakulam, 683101",
+    "lat": 10.1077682,
+    "lng": 76.3568532,
+    "phone": "N/A",
+    "website": "https://www.flashevcharge.com/",
+    "hours": "N/A",
+    "operator": "Automation Gallery / KSEB"
+  },
+  {
+    "name": "CHARGEHUB EVOK PRIVATE LIMITED",
+    "address": "2nd Floor, 4/461, Valamkottil Tower, Edappally-Pukkattupady Road, Cardinal Higher Secondary School, Judgemukku, Thrikkakara, Ernakulam, Kerala, 682021",
+    "lat": 9.9837257,
+    "lng": 76.2740001,
+    "phone": "N/A",
+    "website": "https://evok.co.in/",
+    "hours": "N/A",
+    "operator": "CHARGEHUB EVOK / KSEB"
+  },
+  {
+    "name": "ADD BIO RENERGY (OPC) PRIVATE LIMITED",
+    "address": "16 cotton mill road 3rd street PN Road, Tirupur, Tamil Nadu, 641602",
+    "lat": 11.1671878,
+    "lng": 77.3472673,
+    "phone": "N/A",
+    "website": "https://www.oneplugev.com",
+    "hours": "N/A",
+    "operator": "ADD BIO RENERGY / KSEB"
+  }
+]
