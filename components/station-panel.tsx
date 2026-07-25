@@ -30,6 +30,7 @@ export function StationPanel({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showManualCopy, setShowManualCopy] = useState(false);
 
   const handleDirections = () => {
     if (!station) return;
@@ -54,14 +55,17 @@ export function StationPanel({
       } catch (e) {
         console.log("Error sharing:", e);
       }
-    } else {
+    } else if (typeof navigator !== "undefined" && navigator.clipboard && navigator.clipboard.writeText) {
       try {
         await navigator.clipboard.writeText(shareData.url);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
       } catch (e) {
         console.error("Clipboard copy failed:", e);
+        setShowManualCopy(true);
       }
+    } else {
+      setShowManualCopy(true);
     }
   };
   
@@ -439,6 +443,38 @@ export function StationPanel({
             {copied ? "✓ Copied!" : "🔗 Share"}
           </button>
         </div>
+
+        {showManualCopy && (
+          <div style={{ marginTop: "12px", background: "var(--line)", padding: "10px", borderRadius: "8px" }}>
+            <p style={{ margin: "0 0 6px 0", fontSize: "11px", color: "var(--dim)", textAlign: "left" }}>
+              Sharing API unavailable. Copy this link manually:
+            </p>
+            <div style={{ display: "flex", gap: "6px" }}>
+              <input
+                type="text"
+                readOnly
+                value={typeof window !== "undefined" ? `${window.location.origin}/?id=${station?.id}` : ""}
+                style={{
+                  flex: 1,
+                  background: "var(--bg)",
+                  border: "1px solid var(--line-2)",
+                  color: "var(--text)",
+                  padding: "4px 8px",
+                  fontSize: "11px",
+                  borderRadius: "4px"
+                }}
+                onClick={(e) => (e.target as HTMLInputElement).select()}
+              />
+              <button
+                className="btn"
+                style={{ padding: "4px 8px", fontSize: "11px", height: "auto" }}
+                onClick={() => setShowManualCopy(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="panel-actions-sub" style={{ marginTop: "10px" }}>
           <button className="btn" style={{ width: "100%", justifyContent: "center" }} onClick={onReport} disabled={loading || showTurnstile}>
