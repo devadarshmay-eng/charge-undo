@@ -34,7 +34,3 @@ However, complete transparency is central to the project: **29 town-level accura
 ---
 
 ### Developed by [Devadarsh Anoop](https://devadarsh.pages.dev)
-
----
-
-<sub>**Quickstart:** Clone, run `npm install`, populate `.env` (DATABASE_URL, IMAGEKIT_PRIVATE_KEY, NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY, NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT), and start with `npm run dev`.</sub>
