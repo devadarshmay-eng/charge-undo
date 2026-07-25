@@ -75,6 +75,14 @@ export function ChargeMap() {
         (err) => console.log("Geolocation error, using default: ", err)
       );
     }
+
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("add") === "true") {
+        setReportMode("add");
+        setReportOpen(true);
+      }
+    }
   }, []);
 
   const visible = useMemo(() => stations.filter((station) => !filters.size || filters.has(station.status ?? "unconfirmed")), [stations, filters]);
@@ -319,6 +327,28 @@ export function ChargeMap() {
           </button>
         </div>
       )}
+
+      <div id="location-inaccurate-notice">
+        Some locations may be inaccurate. Help improve the map by{" "}
+        <button
+          onClick={() => {
+            setReportMode("add");
+            setReportOpen(true);
+          }}
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--blue)",
+            textDecoration: "underline",
+            padding: 0,
+            cursor: "pointer",
+            fontWeight: "500"
+          }}
+        >
+          reporting incorrect station locations
+        </button>
+        .
+      </div>
     </main>
   );
 }
