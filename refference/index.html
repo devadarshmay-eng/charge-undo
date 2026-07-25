@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#111315" />
-<title>ChargeUndo — EV Charging Network</title>
+<title>EVUndo — EV Charging Network</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -719,7 +719,7 @@ body.ready .chrome{opacity:1;transform:none}
 
 <script>
 /* ================================================================
-   CHARGEUNDO — map-first EV mobility client
+   EVUNDO — map-first EV mobility client
 ================================================================ */
 'use strict';
 const $ = s => document.querySelector(s);
@@ -1484,7 +1484,7 @@ function toggleFav(s){
 }
 $('#cv-fav').onclick=()=>{ const s=STATIONS.find(x=>x.id===current); if(s) toggleFav(s); };
 function share(s){
-  navigator.clipboard?.writeText(`https://chargeundo.app/s/${s.id}`);
+  navigator.clipboard?.writeText(`https://evundo.app/s/${s.id}`);
   toast('Link copied to clipboard','ok');
 }
 $('#cv-share').onclick=()=>{ const s=STATIONS.find(x=>x.id===current); if(s) share(s); };

@@ -45,7 +45,7 @@ export function StationPanel({
     if (!station) return;
     const shareData = {
       title: `${station.name} - EV Charging Station`,
-      text: `Check out ${station.name} charging station in ${station.address} via ChargeUndo!`,
+      text: `Check out ${station.name} charging station in ${station.address} via EVUndo!`,
       url: typeof window !== "undefined" ? `${window.location.origin}/?id=${station.id}` : ""
     };
 

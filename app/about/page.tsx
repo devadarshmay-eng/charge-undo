@@ -11,7 +11,7 @@ export default function About() {
       <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px 4%", borderBottom: "1px solid rgba(255,255,255,0.07)", background: "rgba(12, 13, 14, 0.9)", backdropFilter: "blur(12px)", position: "sticky", top: 0, zIndex: 100 }}>
         <Link href="/" style={{ textDecoration: "none" }}>
           <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: "28px", letterSpacing: "1px", display: "flex", alignItems: "center" }}>
-            <span style={{ color: "#f9fafb" }}>Charge</span>
+            <span style={{ color: "#f9fafb" }}>EV</span>
             <span style={{ color: "#C6FF3D" }}>Undo</span>
           </div>
         </Link>
@@ -39,7 +39,7 @@ export default function About() {
           Reliable EV Charging Across Kerala. <span style={{ color: "#C6FF3D" }}>Verified by the Crowd.</span>
         </h1>
         <p style={{ color: "#9ca3af", fontSize: "16px", lineHeight: 1.6, marginBottom: "32px", maxWidth: "700px", margin: "0 auto 32px" }}>
-          No more broken chargers, dead batteries, or unexpected queues. ChargeUndo is Kerala's community-driven live mapping platform designed to keep your electric journey seamless from Kasaragod to Thiruvananthapuram.
+          No more broken chargers, dead batteries, or unexpected queues. EVUndo is Kerala's community-driven live mapping platform designed to keep your electric journey seamless from Kasaragod to Thiruvananthapuram.
         </p>
         <div style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
           <Link href="/" style={{
@@ -127,7 +127,7 @@ export default function About() {
           Solving the Highway Charging Dilemma
         </h2>
         <p style={{ color: "#9ca3af", fontSize: "15px", lineHeight: 1.6, marginBottom: "32px" }}>
-          As EV adoption in Kerala grows rapidly, charging point reliability has become the ultimate hurdle. While network operators report chargers as online, local drivers often encounter broken plugs, power fluctuations, or ICE cars blocking the stall. ChargeUndo bypasses system status feeds by empowering EV drivers in Kerala to confirm and report current situations on the ground.
+          As EV adoption in Kerala grows rapidly, charging point reliability has become the ultimate hurdle. While network operators report chargers as online, local drivers often encounter broken plugs, power fluctuations, or ICE cars blocking the stall. EVUndo bypasses system status feeds by empowering EV drivers in Kerala to confirm and report current situations on the ground.
         </p>
       </section>
 
@@ -174,7 +174,7 @@ export default function About() {
               Our platform continuously monitors pin density to highlight under-served routes in Kerala. 
             </p>
             <p style={{ color: "#9ca3af", fontSize: "14px", lineHeight: 1.6 }}>
-              Whether you are driving down MC Road, navigating high-range routes in Idukki, or cruising NH 66, ChargeUndo alerts you of charging deserts, helping you plan stops precisely where functional chargers exist.
+              Whether you are driving down MC Road, navigating high-range routes in Idukki, or cruising NH 66, EVUndo alerts you of charging deserts, helping you plan stops precisely where functional chargers exist.
             </p>
           </div>
           <div style={{ background: "rgba(182, 163, 255, 0.03)", border: "1px solid rgba(182, 163, 255, 0.1)", borderRadius: "14px", padding: "30px" }}>
@@ -202,9 +202,9 @@ export default function About() {
         </h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "20px" }}>
-            <h3 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "8px" }}>How does ChargeUndo verify station status?</h3>
+            <h3 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "8px" }}>How does EVUndo verify station status?</h3>
             <p style={{ color: "#9ca3af", fontSize: "13.5px", lineHeight: 1.5 }}>
-              ChargeUndo relies on user check-ins. Whenever you visit a charging site, you can Confirm or Dispute its status preset. The system uses a Cloudflare Turnstile challenge and device tracking header logic to prevent fake feedback.
+              EVUndo relies on user check-ins. Whenever you visit a charging site, you can Confirm or Dispute its status preset. The system uses a Cloudflare Turnstile challenge and device tracking header logic to prevent fake feedback.
             </p>
           </div>
           <div style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "20px" }}>
@@ -214,7 +214,7 @@ export default function About() {
             </p>
           </div>
           <div style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "20px" }}>
-            <h3 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "8px" }}>Is ChargeUndo affiliated with network operators?</h3>
+            <h3 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "8px" }}>Is EVUndo affiliated with network operators?</h3>
             <p style={{ color: "#9ca3af", fontSize: "13.5px", lineHeight: 1.5 }}>
               No. We are entirely independent and community-driven. This allows us to provide honest, unfiltered status verifications without corporate biases.
             </p>
@@ -249,7 +249,7 @@ export default function About() {
 
       {/* Footer */}
       <footer style={{ textAlign: "center", padding: "40px 4%", borderTop: "1px solid rgba(255,255,255,0.05)", color: "#6b7280", fontSize: "12px" }}>
-        <p>&copy; {new Date().getFullYear()} ChargeUndo. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} EVUndo. All rights reserved.</p>
         <p style={{ marginTop: "8px" }}>Ensuring charging transparency for Kerala's EV community.</p>
       </footer>
     </div>

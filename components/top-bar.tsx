@@ -47,7 +47,7 @@ export function TopBar({
     <header id="topbar">
       <div className="row1">
         <div className="logo-lockup">
-          <span className="charge">Charge</span>
+          <span className="ev">EV</span>
           <span className="undo">Undo</span>
         </div>
         <div id="searchwrap" className={query ? "has-q" : ""}>
@@ -102,7 +102,7 @@ export function TopBar({
         <a
           href="/about"
           className="icobtn srf"
-          title="About ChargeUndo"
+          title="About EVUndo"
           style={{
             display: "flex",
             alignItems: "center",

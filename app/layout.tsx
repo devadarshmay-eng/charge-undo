@@ -4,7 +4,7 @@ import { DeviceIdInitializer } from "@/components/device-id-initializer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ChargeUndo",
+  title: "EVUndo",
   description: "EV charging station status reporting",
 };
 
